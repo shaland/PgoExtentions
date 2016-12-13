@@ -30,16 +30,19 @@ P-GO SEARCHの拡張、カスタマイズの手順です。
 　　など。
 
 【手順】
-1.拡張用のテキストファイル(Javascript)を端末にダウンロード
-2.ブラウザでP-GO SEARCHのページを起動 https://pmap.kuku.lu/
-3.F12キーを押して、開発用のウィンドウを表示
-4.「Console」をクリックし、拡張用のテキストファイルの中身を全てコピペし、Enterキーを押す
-5.「startExtention()」を打ち込み、Enterキーを押す
-6.画面にボタンとか表示されれば成功。F12キーを押して、開発用のウィンドウを閉じれば準備完了！！
+1.ブラウザでP-GO SEARCHのページを起動 https://pmap.kuku.lu/
+2.F12キーを押して、開発用のウィンドウを表示
+3.「Console」をクリックし、以下をコピペし、Enterキーを押す　
+　
+ $.getScript("https://cdn.rawgit.com/shaland/PgoExtentions/master/extention.js",function(){startExtention();});
+
+4.画面にボタンとか表示されれば成功。F12キーを押して、開発用のウィンドウを閉じれば準備完了！！
 
 【補足】
-ポケモンまでのルートがうまく表示できない場合は、拡張用テキスト内の、下のURLの後にGoogleApiのキーを入れてください。
-GoogleApiのキーは自分で取得する必要があります。
+ポケモンまでのルートがうまく表示できない場合は、上記にあるJavaScriptをいったんテキストエディタに貼り付け、
+下のURLの後にGoogleApiのキーを入れてください。それをすべて「Console」の画面に張り付けてEnterキーで動くはずです。
+なお、GoogleApiのキーは自分で取得する必要があります。
 とりあえず無料ですが、良くわからなければ無視してください。
 ルート表示以外は使えますので。
+
 $.getScript("https://maps.googleapis.com/maps/api/js?key=ここにキーを入力");
