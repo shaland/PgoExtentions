@@ -33,7 +33,7 @@ function startExtention(){
 	//カスタムコントロール追加
 	addCustomControlShowNearPokemon();
 	addCustomControlStreetView()
-//	addCustomControlSearchPokeSource();
+	addCustomControlSearchPokeSource();
 
 	addCustomControlShowPokemonWithoutWimp();
 	addCustomControlShowPushOnly();
@@ -193,7 +193,8 @@ function addGoogleLayers(){
 //_/_/_/_/_/_/_/_/GoogleMapAPI追加_/_/_/_/_/_/_/_/_/_/_/_/
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 function prepareGoogleMapApi(){
-	$.getScript("https://maps.googleapis.com/maps/api/js");
+//	$.getScript("https://maps.googleapis.com/maps/api/js");
+	$.getScript("https://maps.googleapis.com/maps/api/js?key=AIzaSyD7Tjp5YntHWW7WDsy_JESjGx1fRReIT6o");
 }
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 //_/_/_/_/_/_/_/_/バウンズアニメーション用JS追加_/_/_/_/_/_/_/_/_/_/_/_/
@@ -776,6 +777,551 @@ function showPushOnly(){
 	}	
 }
 
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+//_/_/_/_/_/_/_/_/自動更新_/_/_/_/_/_/_/_/_/_/_/_/
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+//_/_/_/_/_/_/共通_/_/_/_/_/_/_/_/
+var _marker_area = [];
+var _marker_circle = [];
+var _count=0;
+var _searchInterval=10000; //検索の間隔
+
+function searchPointByLoc(loc1,loc2){
+	var count = _count;
+	console.log("★★latlng: "+loc1+","+loc2+":" + count);
+		
+	research_key = uuid();
+
+	$.ajax({
+	    url: "https://sv-webdb1.pmap.kuku.lu/_server.php",
+	    type: "GET",
+	    data: "&uukey=c2e316f11149c3f8e1ff5da39efe46de&sysversion=1000&action=addServerQueue&support_localsearch="+support_localsearch+"&run_key="+research_key+"&loc1="+loc1+"&loc2="+loc2,
+//	    data: "&action=addServerQueue&support_localsearch=&run_key="+research_key+"&loc1="+loc1+"&loc2="+loc2,
+	    timeout: 6000,
+	    cache: false
+	}).done(function(data, status, xhr) {
+		if (data.indexOf("OK") != 0) {
+			console.log("★★メンテナンス中★★");
+			_marker_circle[count]=L.circle([loc1,loc2],100,{"fill": true,"fillOpacity": 0.2,"weight": 0,"color": "#ff0000"}).addTo(map);
+		} else {
+			var _tmp = data.split("OK:");
+			var _res = parseValue(_tmp[1]);
+			if (_res["server"] == "busy") {
+				console.log("★★busy★★");
+				_marker_circle[count]=L.circle([loc1,loc2],100,{"fill": true,"fillOpacity": 0.2,"weight": 0,"color": "#ffff00"}).addTo(map);
+				research_runserver = _res;
+			} else {
+				console.log("★★OK★★");
+				_marker_circle[count]=L.circle([loc1,loc2],200,{"fill": true,"fillOpacity": 0.2,"weight": 0,"color": "#0000ff"}).addTo(map);	
+//				//サークルを徐々に非表示にする
+//				var timerID = setInterval(function(){
+//					var opacity = _marker_circle[count].options.fillOpacity - 0.03;
+//					_marker_circle[count].setStyle({"fillOpacity": opacity});
+//					if(opacity <= 0){
+//						clearInterval(timerID);
+//					}
+//				},100);
+				
+				research_runserver = _res;
+				//ポケソースモードの場合、無駄処理を抑えるため、今回チェックしたﾎﾟｲﾝﾄから、半径200m以内のポケソースはスキップ対象にする
+				if(_pokesource_list){
+					var i;
+					for(i=0;i<_pokesource_list.length;i++){
+						var ent = _pokesource_list[i];
+						var latlng = ent.loc.split(",");
+						if(getDistance(parseFloat(loc1), parseFloat(loc2), parseFloat(latlng[0]), parseFloat(latlng[1]))<=200){
+							//サーチをスキップ対象に
+							ent.skipSearch = true;
+						}
+					}
+				}
+			}
+		}
+	}).fail(function(xhr, status, error) {
+			console.log("★★ERROR★★");
+			_marker_circle[count]=L.circle([loc1,loc2],100,{"fill": true,"opacity": 0.8,"weight": 2,"color": "#ff0000"}).addTo(map);
+	});
+}
+
+//ポケソースの時間チェック
+function checkPokeSourceNow(ent) {
+	var losttimes = ent.losttime.split(",");
+	for (var x in losttimes) {
+		var losttime = parseInt(losttimes[x]);
+		if (checkPokeSourcePoptimeSingle(losttime, ent.longtime)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+//_/_/_/_/_/_/_/_/ポケソース更新_/_/_/_/_/_/_/_/_/_/
+function addCustomControlSearchPokeSource(){
+	var customControlSearchPokeSource = L.Control.extend({
+			options: {
+		    	position: 'topright' 
+		  	},
+
+			onAdd: function (map) {
+				var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom leaflet-control-command-interior');
+					container.id = "button_customcontrol_SearchPokeSource";
+					container.innerHTML = "ﾎﾟｹｿｰｽ更新";
+					container.style.backgroundColor = 'white';
+					container.style.width = '80px';
+					container.style.height = '20px';
+					container.style.padding = '5px';
+					container.style.fontSize = '50%';
+					container.style.textAlign = 'center';
+					container.style.fontColor = '#999999';
+					container.style.cursor = 'pointer';
+
+					container.onclick = function(){
+		      			searchPokesourceMain();
+		    		}
+		    	return container;
+		  	},
+		});
+	map.addControl(new customControlSearchPokeSource());
+}
+
+var _isShowPokesourceMode = false;
+var _isJitakuMode;
+var _priorityPoint = [];
+var _priorityRectangles = [];
+var _timerIdSearchPokesource;
+var _timerIdCheckPokeFound;
+var _timerIdResetCounter;
+//_/_/_/_/_/_/_/_/ポケソースサーチ実行_/_/_/_/_/_/_/_/_/_/
+function searchPokesourceMain(){
+	if(_isShowPokesourceMode) {
+		//停止
+        _isShowPokesourceMode = false;
+		$('#button_customcontrol_SearchPokeSource').css('backgroundColor', 'white');
+		
+		clearInterval(_timerIdSearchPokesource);
+		clearInterval(_timerIdCheckPokeFound);
+		clearInterval(_timerIdResetCounter);
+
+		_priorityPoint=[];		
+		_pokesource_list=[];
+		_center=[];
+		_prepareCount = 0;
+		_prepareOK = false;
+
+		//_priorityRectangles
+
+		//マーカーをクリア
+		var i;
+		for(i=0;i<_marker_circle.length;i++){
+			if(_marker_circle[i]) {
+			 	_marker_circle[i].remove();
+			 	_marker_circle[i] = null;
+			}
+		}
+		_marker_circle=[];
+		
+		//優先エリアをクリア
+		for(i=0;i<_priorityRectangles.length;i++){
+			if(_priorityRectangles[i]) {
+			 	_priorityRectangles[i].remove();
+			 	_priorityRectangles[i] = null;
+			}
+		}
+		_priorityRectangles=[];
+		
+		//画面メッセージ
+		viewTopMessage("ポケソース更新終了","・・・");	
+    } else {
+    	//開始
+        _isShowPokesourceMode = true;
+		$('#button_customcontrol_SearchPokeSource').css('backgroundColor', '#FFCC66');
+
+		var radius=0.0005;
+
+		//画面中央を基点
+		_center = getCenterMap();
+		
+			//通常モード
+			_isJitakuMode = false;
+			_targetList[0] = _center;
+			
+		//処理対象の分だけループ
+		for(i=0;i<_targetList.length;i++){
+			var target = _targetList[i];
+
+			console.log("★★処理対象"+target[0]+","+target[1]);
+			
+			//準備処理
+			prepareSearchPokesource(target[0],target[1]); 
+		}
+    }
+}
+
+var _pokesource_list=[];
+var _center=[];
+var _prepareCount = 0;
+var _prepareOK = false;
+//_/_/_/_/_/_/_/_/ポケソース更新の準備処理_/_/_/_/_/_/_/_/_/_/
+function prepareSearchPokesource(lat,lng) {
+	var mode = 'viewData'
+	if (research_runserver["dbserver"]) {
+		using_dbserver = research_runserver["dbserver"];
+	}	
+		
+	var pokesource = ""+lat+","+lng;
+	
+	$.ajax({
+	   	url: "https://"+using_dbserver+"/_dbserver.php?uukey=c2e316f11149c3f8e1ff5da39efe46de&sysversion=1000&action="+encodeURIComponent(mode)+"&fort=&pokesource_loc="+encodeURIComponent(pokesource)+"&history_pokemonid=&sv="+encodeURIComponent(research_runserver["server"])+"&research_key="+encodeURIComponent(research_key)+"&loc1="+encodeURIComponent(lat)+"&loc2="+encodeURIComponent(lng),
+//	   	url: "https://"+using_dbserver+"/_dbserver.php?action="+encodeURIComponent(mode)+"&fort=&pokesource_loc="+encodeURIComponent(pokesource)+"&history_pokemonid=&sv="+encodeURIComponent(research_runserver["server"])+"&research_key="+encodeURIComponent(research_key)+"&loc1="+encodeURIComponent(lat)+"&loc2="+encodeURIComponent(lng),
+	    type: "GET",
+	    data: "",
+	    timeout: 8000,
+	    cache: false
+	}).done(function(data, status, xhr) {		
+//		console.log(data);
+		
+		viewServerError(false);
+		
+		addPokeSourceList(data);
+		
+		_prepareCount++;
+		
+		if(_prepareCount==_targetList.length){
+			//全部揃ったところで初期化
+			for(i=0;i<_pokesource_list.length;i++){
+				_pokesource_list[i].skipSearch=false;
+				_marker_circle[i] = null;
+			}
+			_prepareOK=true;
+			//画面メッセージ
+			var modeName = _isJitakuMode ? "【自宅モード】" : "【通常モード】";
+			viewTopMessage(modeName + "ポケソース更新処理実行-ポケソース数："+_pokesource_list.length,"中央から順にチェック");	
+			//初回実行
+			searchPokesource();
+			
+			//一定間隔でポケソースを対象にポケモンを検索
+			_timerIdSearchPokesource = setInterval(searchPokesource, _searchInterval);
+
+			//一定間隔でポケモンの状態をチェック
+			_timerIdCheckPokeFound = setInterval(checkPokeFound, _searchInterval);
+
+			//一定間隔で最初の地点から検索
+			_timerIdResetCounter = setInterval(resetCounter, 10*60*1000);
+		}
+	}).fail(function(xhr, status, error) {
+		//console.log("DBServer: error: "+error);
+	    //alert("操作に失敗しました。インターネット接続が安定している場所で再度お試しください。");
+	    viewServerError("接続エラー");
+	});
+}
+
+function addPokeSourceList(data){
+	var dataList = data.split("\n");
+	for (var i=0; i<dataList.length; i++) {
+		var ent = parseValue(dataList[i]);
+		
+		//揺らぎを防ぐ(?)ため場所を短くする
+		if(ent.loc){
+			var tmp = ent.loc.split(",");
+			ent.loc = ""+mRound(tmp[0],9)+","+mRound(tmp[1],9);
+		}
+		
+		//ポケソース情報を格納
+		if (ent.action == "found_ps") {
+			if(!GetPokeSourceByLoc(ent.loc)){
+				//同一キーがなければ追加
+				_pokesource_list.push(ent);
+			}
+		}
+
+		//ポケモン出現済みかを確認
+		if (ent.action == "found") {
+			var ent2 = GetPokeSourceByLoc(ent.loc);
+			if (ent2) {
+				//ポケソース出現の場合は出現済みに更新
+//					console.log("★★found: "+ent.loc + ";" + ent.id);
+				ent2.found = true;
+				//発見したポケIDをポケソースに登録
+				ent2.id = ent.id;
+			}
+		}
+	}
+	
+	//対象範囲を描画
+//	drawArea(dataList);
+	
+	//中心から近い順にソート
+	_pokesource_list.sort(function(a,b){
+		var radius=0.0005;
+		var latlng_a;
+		var latlng_b;
+		var point_a;
+		var point_b;
+		var priority_a = 0;
+		var priority_b = 0;
+		
+		latlng_a = a.loc.split(",");
+		latlng_b = b.loc.split(",");
+
+		//優先ポイントのエリアに入っているかチェック
+		for(i=0;i<_priorityPoint.length;i++){
+			if(    ((_priorityPoint[i][0]-radius) <= latlng_a[0]) && (latlng_a[0] <= (_priorityPoint[i][0]+radius))
+			    && ((_priorityPoint[i][1]-radius) <= latlng_a[1]) && (latlng_a[1] <= (_priorityPoint[i][1]+radius)) ){
+			    priority_a=1;
+			    break;
+			}
+		}
+		for(i=0;i<_priorityPoint.length;i++){
+			if(    ((_priorityPoint[i][0]-radius) <= latlng_b[0]) && (latlng_b[0] <= (_priorityPoint[i][0]+radius))
+			    && ((_priorityPoint[i][1]-radius) <= latlng_b[1]) && (latlng_b[1] <= (_priorityPoint[i][1]+radius)) ){
+			    priority_b=1;
+			    break;
+			}
+		}
+		
+		//優先ポイントの場合は、優先ポイントの有無で比較
+		if(priority_a != 0 || priority_b !=0){
+			return priority_b - priority_a;
+		} 
+		
+		//中心点からのﾎﾟｲﾝﾄを求める
+		point_a = getDistance(parseFloat(_center[0]), parseFloat(_center[1]), parseFloat(latlng_a[0]), parseFloat(latlng_a[1]));
+		point_b = getDistance(parseFloat(_center[0]), parseFloat(_center[1]), parseFloat(latlng_b[0]), parseFloat(latlng_b[1]));
+		
+		//中心点からのポイントで比較
+		return point_a - point_b;
+	});
+}
+
+//対象エリアを描画
+function drawArea(dataList){
+	//エリアを描画
+	var min_lat=0;
+	var min_lng=0;
+	var max_lat=0;
+	var max_lng=0;
+	for(i=0;i<dataList.length;i++){
+		var ent = parseValue(dataList[i]);
+	
+		if (ent.action != "found_ps") continue;
+
+		var latlng=ent.loc.split(",");
+		
+		//初期値セット
+		if(i==0){
+			min_lat=latlng[0];
+			min_lng=latlng[1];
+		}
+		
+		if(latlng[0]<min_lat) min_lat=latlng[0];
+		if(max_lat<latlng[0]) max_lat=latlng[0];
+		if(latlng[1]<min_lng) min_lng=latlng[1];
+		if(max_lng<latlng[1]) max_lng=latlng[1];
+	}
+	
+	//処理範囲を描画
+	console.log("★★" + min_lat + ":" + min_lng + ":" + max_lat + ":" + max_lng);
+	var bounds = [[min_lat,min_lng],[max_lat,max_lng]];
+	_marker_area.push(L.rectangle(bounds,{"fill": true,"opacity": 0.2,"weight": 1,"color": "#ff3333"}).addTo(map));
+}
+
+//ポケソースリストからゲット
+function GetPokeSourceByLoc(loc){
+	for(i=0;i<_pokesource_list.length;i++){
+		if(_pokesource_list[i].loc == loc) return _pokesource_list[i];
+	}
+	return false;
+}
+
+//ポケモンが発見済みかをチェック
+var _counter_checkPokeFound=0;
+function checkPokeFound(){
+	var mode = 'viewData'
+	var target=[];
+	var lat;
+	var lng;
+	var counter;
+	
+	//初期化前の場合は処理終了
+	if(!_prepareOK) return;
+	
+	//カウンタ越えの場合は初期化
+	if(_targetList.length<=_counter_checkPokeFound){
+		for (i=0;i<_targetList.length;i++){
+			_targetList[i].found = false;
+		}
+		_counter_checkPokeFound=0;
+	}
+
+	//ローカル変数に格納してカウンタインクリメント
+	counter=_counter_checkPokeFound;
+	_counter_checkPokeFound++;
+
+//	console.log("★★ポケモン発見済みチェック:" + counter);
+
+	if (research_runserver["dbserver"]) {
+		using_dbserver = research_runserver["dbserver"];
+	}
+	
+	//処理対象を決定
+	target = _targetList[counter];
+
+//	console.log("★★チェックターゲット:" + target);
+	
+	//未定義なら処理終了
+	if(!target) return;
+
+	lat = target[0];
+	lng = target[1];
+	var pokesource = ""+lat+","+lng;
+	
+	$.ajax({
+	   	url: "https://"+using_dbserver+"/_dbserver.php?uukey=c2e316f11149c3f8e1ff5da39efe46de&sysversion=1000&action="+encodeURIComponent(mode)+"&fort=&pokesource_loc="+encodeURIComponent(pokesource)+"&history_pokemonid=&sv="+encodeURIComponent(research_runserver["server"])+"&research_key="+encodeURIComponent(research_key)+"&loc1="+encodeURIComponent(lat)+"&loc2="+encodeURIComponent(lng),
+//	   	url: "https://"+using_dbserver+"/_dbserver.php?action="+encodeURIComponent(mode)+"&fort=&pokesource_loc=&history_pokemonid=&sv="+encodeURIComponent(research_runserver["server"])+"&research_key="+encodeURIComponent(research_key)+"&loc1="+encodeURIComponent(lat)+"&loc2="+encodeURIComponent(lng),
+	    type: "GET",
+	    data: "",
+	    timeout: 8000,
+	    cache: false
+	}).done(function(data, status, xhr) {		
+		viewServerError(false);
+		
+		var dataList = data.split("\n");
+		for (var i=0; i<dataList.length; i++) {
+			var ent = parseValue(dataList[i]);
+			
+			//揺らぎを防ぐ(?)ため場所を短くする
+			if(ent.loc){
+				var tmp = ent.loc.split(",");
+				ent.loc = ""+mRound(tmp[0],9)+","+mRound(tmp[1],9);
+			}
+			
+			//取得したデータが、ポケソースの場合
+			if (ent.action == "found") {
+				//ポケソースの情報を取得
+				var ent2 = GetPokeSourceByLoc(ent.loc);
+				if (ent2) {
+					//ポケソース出現の場合は出現済みに更新
+//					console.log("★★found: "+ent.loc + ";" + ent.id);
+					ent2.found = true;
+					//発見したポケIDをポケソースに登録
+					ent2.id = ent.id;
+				}
+			}
+		}
+		
+	}).fail(function(xhr, status, error) {
+		console.log("★★DBServer: error: "+error);
+	    //alert("操作に失敗しました。インターネット接続が安定している場所で再度お試しください。");
+	    viewServerError("接続エラー");
+	});
+}
+
+//ポケソースで検索
+function searchPokesource(){
+	var ent;
+	var target;
+	
+	//初期化前の場合は処理終了
+	if(!_prepareOK) return;
+
+	if(!_pokesource_list) return;
+	if(_pokesource_list.length==0) return;
+	
+	//処理対象を調べる
+	for(i=_count;i<=_pokesource_list.length;i++){
+		//最後まで確認すればカウントを初期化
+		if(_pokesource_list.length <= i) i=0;
+		
+		//無限ループ嫌なので無理やり処理終わらせる
+		if(i==_count-1){
+			_count++;
+			return;
+		}
+		
+		//前回マーカがあれば削除
+		if(_marker_circle[i]) {
+		 	_marker_circle[i].remove();
+		 	_marker_circle[i] = null;
+		}
+		
+		//処理対象をセット
+		ent=_pokesource_list[i];
+	 	target = ent.loc.split(",");
+				
+		if(!checkPokeSourceNow(ent)){
+			//表示対象時間じゃない場合は、処理しない
+//			console.log("★★表示時間外なのでスキップ: "+i);
+			ent.found=false;
+			continue;
+		}else if(ent.found) {
+			//既にポケモン表示済みなら処理しない
+//			console.log("★★既に表示済みなのでスキップ: "+i+":"+ent.id);
+/*
+			_marker_circle[i]=L.circle([target[0],target[1]],25,{"fill": true,"opacity": 0.8,"weight": 1,"color": "#999999"}).addTo(map)
+				.bindPopup(i + ":" + "<img src='" + getIconImage(ent.id) + "' width='30'>" + getPokemonLocal(ent.id))
+				.on('mouseover', function (e) {this.openPopup();})
+        		.on('mouseout', function (e) {this.closePopup();});
+*/
+			continue;
+		}else if(ent.skipSearch) {
+			//スキップサーチのポケソースなら処理しない
+//			console.log("★★スキップ対象: "+i+":"+ent.id);
+			continue;
+		} else {
+			//まだポケモンが未表示であれば、処理対象に決定
+			console.log("★★処理対象: "+i);
+			break;
+		}
+	}
+	
+	_count=i;
+		
+	//検索処理実行
+	searchPointByLoc(target[0],target[1]);
+	
+	//カウンタをインクリメント
+	_count++;
+	if(_pokesource_list.length<=_count){_count=0};	
+}
+
+//カウンタリセット
+function resetCounter(){
+	//初期化前の場合は処理終了
+	if(!_prepareOK) return;
+
+	console.log("★★リセット"+_count);
+	//全マークを初期化
+	for(i=0;i<_pokesource_list.length;i++){
+		var ent = _pokesource_list[i];
+		var target = ent.loc.split(",");
+
+		//前回マーカがあれば削除
+		if(_marker_circle[i]) {
+		 	_marker_circle[i].remove();
+		 	_marker_circle[i] = null;
+		}
+		
+		//サーチスキップは初期化
+		_pokesource_list[i].skipSearch=false;
+
+		
+		if(!checkPokeSourceNow(ent)){
+			//表示対象時間じゃない場合は、非表示扱い
+			ent.found=false;
+		} else if(ent.found){
+//			//既にポケモンが表示されている場合はマークを表示
+//			_marker_circle[i]=L.circle([target[0],target[1]],25,{"fill": true,"opacity": 0.8,"weight": 1,"color": "#999999"}).addTo(map)
+//				.bindPopup(i + ":" + "<img src='" + getIconImage(ent.id)+"' width='30'>" + getPokemonLocal(ent.id))
+//				.on('mouseover', function (e) {this.openPopup();})
+//        		.on('mouseout', function (e) {this.closePopup();});
+		} else {
+			//表示対象だけど まだ未表示の場合は、特に処理しない
+			ent.found = false;
+		}
+	}
+	_count=0;
+}
 
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 //_/_/_/_/_/_/_/_/ポケモンまでの道順表示_/_/_/_/_/_/_/_/_/_/_/_/
