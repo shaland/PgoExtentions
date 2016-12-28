@@ -2,6 +2,9 @@
 //_/_/_/_/_/_/_/_/拡張開始_/_/_/_/_/_/_/_/_/_/_/_/
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 function startExtention(){
+	//画像読み込みのエラー回避
+	$(".leaflet-control-layers-toggle").css("background-image");
+
 	//GoogleMap追加
 	addGoogleLayers();
 	
@@ -13,23 +16,36 @@ function startExtention(){
 	
 	//プロット時間短縮
 	setInterval(hoge, 8000);
+
+//	//地図ジャンプを非表示
+//	$("#button_customcontrol_area").remove();
 	
+	//地図ジャンプを小さく
+	$("#button_customcontrol_area").css({"height":"32px","width":"32px","background-image":"url(https://img-pmap.aquapal-cdn.net/img/icon_area.png)", "background-size":"cover"});;
+	$("#button_customcontrol_area").find("img").remove();
+	
+	//出現記録ボタンを小さく
+	$("#button_customcontrol_history").css({"height":"32px","width":"32px","background-image":"url(https://img-pmap.aquapal-cdn.net/img/icon_history.png)", "background-size":"cover"});
+	$("#button_customcontrol_history").find("img").remove();
+
+	//設定ボタンを小さく
+	$("#button_customcontrol_config").css({"height":"32px","width":"32px","background-image":"url(https://img-pmap.aquapal-cdn.net/img/icon_config.png)", "background-size":"cover"});
+	$("#button_customcontrol_config").find("img").remove();
+
+	//プッシュ通知ボタンを小さく
+	$("#button_customcontrol_push").css({"height":"32px","width":"32px","background-image":"url(https://img-pmap.aquapal-cdn.net/img/icon_push.png)", "background-size":"cover"});
+	$("#button_customcontrol_push").find("img").remove();
+
+	//マップレイヤ小さく
+//	$(".leaflet-control-layers").css({"width":"32px", "height":"32px"});
+	$(".leaflet-control-layers-toggle").css({"width":"32px", "height":"32px", "background-image":"url(https://img-pmap.aquapal-cdn.net/img/icon_area.png)", "background-size":"cover"});
+
 	//フッタ非表示
 	hideFooter();
 	
 	//ボタンサーチを非表示
 	$("#area_buttonsearch").hide();
-
-//	//地図ジャンプを非表示
-//	$("#button_customcontrol_area").remove();
 	
-	//出現記録ボタンを小さく
-	$("#button_customcontrol_history").css({"height":"20px","width":"80px","fontSize":"50%","padding":"5px"});
-	//設定ボタンを小さく
-	$("#button_customcontrol_config").css({"height":"20px","width":"80px","fontSize":"50%","padding":"5px"});
-	//プッシュ通知ボタンを小さく
-	$("#button_customcontrol_push").css({"height":"20px","width":"80px","fontSize":"50%","padding":"5px"});
-
 	//カスタムコントロール追加
 	addCustomControlShowNearPokemon();
 	addCustomControlStreetView()
@@ -263,7 +279,7 @@ function getFooterHeight() {return 0;} //既存メソッドをオーバライド
 function addCustomControlShowNearPokemon(){
 	var customControlShowNearPokemon = L.Control.extend({
 			options: {
-		    	position: 'topright' 
+		    	position: 'topleft' 
 		  	},
 
 			onAdd: function (map) {
@@ -796,8 +812,8 @@ function searchPointByLoc(loc1,loc2){
 	$.ajax({
 	    url: "https://sv-webdb1.pmap.kuku.lu/_server.php",
 	    type: "GET",
-	    data: "&uukey=c2e316f11149c3f8e1ff5da39efe46de&sysversion=1000&action=addServerQueue&support_localsearch="+support_localsearch+"&run_key="+research_key+"&loc1="+loc1+"&loc2="+loc2,
-//	    data: "&action=addServerQueue&support_localsearch=&run_key="+research_key+"&loc1="+loc1+"&loc2="+loc2,
+	    data: "&uukey=c2e316f11149c3f8e1ff5da39efe46de&sysversion=1000&action=addServerQueue&run_key="+research_key+"&loc1="+loc1+"&loc2="+loc2,
+//	    data: "&action=addServerQueue&run_key="+research_key+"&loc1="+loc1+"&loc2="+loc2,
 	    timeout: 6000,
 	    cache: false
 	}).done(function(data, status, xhr) {
@@ -860,7 +876,7 @@ function checkPokeSourceNow(ent) {
 function addCustomControlSearchPokeSource(){
 	var customControlSearchPokeSource = L.Control.extend({
 			options: {
-		    	position: 'topright' 
+		    	position: 'topleft' 
 		  	},
 
 			onAdd: function (map) {
@@ -1387,7 +1403,7 @@ function setEvent(){
 function addCustomControlStreetView(){
 	var customControlShowStreetView = L.Control.extend({
 			options: {
-		    	position: 'topright' 
+		    	position: 'topleft' 
 		  	},
 
 			onAdd: function (map) {
