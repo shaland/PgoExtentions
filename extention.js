@@ -885,6 +885,7 @@ function addCustomControlSearchPokeSource(){
 	map.addControl(new customControlSearchPokeSource());
 }
 
+var _targetList=[];//検索対象
 var _isShowPokesourceMode = false;
 var _isJitakuMode;
 var _priorityPoint = [];
