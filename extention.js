@@ -1658,6 +1658,8 @@ function removeMarkerFromStreetView(key){
 			_streetViewMarkers.splice(i,1);
 			console.log("★★削除:"+key);
 			return;
+		}
+	}
 }
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 //_/_/_/_/_/_/_/_/フルスクリーン対応_/_/_/_/_/_/_/_/_/_/_/_/
