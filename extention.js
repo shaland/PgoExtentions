@@ -51,6 +51,7 @@ function startExtention(){
 	addCustomControlStreetView()
 	addCustomControlSearchPokeSource();
 
+	addCustomControlShowFullScreen();
 	addCustomControlShowPokemonWithoutWimp();
 	addCustomControlShowPushOnly();
 	addCustomControlShowPokemonDictionary();
@@ -74,7 +75,6 @@ function startExtention(){
 	
 	//近くのポケモンクリック(いきなりすぎると表示まで時間かかるのでディレイ)
 	setTimeout(function(){$("#button_customcontrol_ShowNearPokemon").click();},3000)
-	
 }
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 //_/_/_/_/_/_/_/_/汎用関数_/_/_/_/_/_/_/_/_/_/_/_/
@@ -1648,16 +1648,89 @@ function addMarkerToStreetView(key) {
 	console.log("★★追加:"+key);
 }
 
-//_/_/_/_/_/_/_/_/ストリートビューから、指定のマーカ削除_/_/_/_/_/_/_/_/_/_/
-function removeMarkerFromStreetView(key){
-	var i;
-	for(i=0; i<_streetViewMarkers.length;i++){
-		var marker = _streetViewMarkers[i]
-		if(marker.loc == key){
-			marker.setMap(null);
-			_streetViewMarkers.splice(i,1);
-			console.log("★★削除:"+key);
-			return;
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+//_/_/_/_/_/_/_/_/フルスクリーン対応_/_/_/_/_/_/_/_/_/_/_/_/
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+//_/_/_/_/_/_/_/_/フルスクリーンボタンの追加_/_/_/_/_/_/_/_/_/_/
+function addCustomControlShowFullScreen(){
+	//ブラウザ未対応なら追加しない
+	if(!canFullScreen()) return;
+	
+	var customControl = L.Control.extend({
+			options: {
+		    	position: 'bottomright' 
+		  	},
+
+			onAdd: function (map) {
+				var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom leaflet-control-command-interior');
+					container.id = "button_customcontrol_ShowFullScreen";
+					container.innerHTML = "FullScreen";
+					container.style.backgroundColor = 'white';
+					container.style.width = '80px';
+					container.style.height = '20px';
+					container.style.padding = '5px';
+					container.style.fontSize = '50%';
+					container.style.textAlign = 'center';
+					container.style.fontColor = '#999999';
+					container.style.cursor = 'pointer';
+
+					container.onclick = function(){
+		      			showFullScreen();
+		    		}
+		    	return container;
+		  	},
+		});
+	map.addControl(new customControl());
+}
+
+//_/_/_/_/_/_/_/_/フルスクリーン可否確認_/_/_/_/_/_/_/_/_/_/
+function canFullScreen(){
+	return (
+		document.fullscreenEnabled ||
+		document.webkitFullscreenEnabled ||
+		document.mozFullScreenEnabled ||
+		document.msFullscreenEnabled ||
+		false
+	);
+}
+var _isFullScreenMode = false;
+//_/_/_/_/_/_/_/_/フルスクリーン表示切替_/_/_/_/_/_/_/_/_/_/
+function showFullScreen(){
+	if(_isFullScreenMode) {
+		//停止
+		$('#button_customcontrol_ShowFullScreen').css('backgroundColor', 'white');
+        toggleFullScreen(false);
+        _isFullScreenMode = false;
+    } else {
+    	//開始
+		$('#button_customcontrol_ShowFullScreen').css('backgroundColor', '#FFCC66');
+        toggleFullScreen(true);
+        _isFullScreenMode = true;
+    }
+}
+
+//_/_/_/_/_/_/_/_/フルスクリーン切り替え_/_/_/_/_/_/_/_/_/_/
+function toggleFullScreen(full){
+	if(full){
+		var elem = $("body").get(0);
+		if (elem.requestFullscreen) {
+		  elem.requestFullscreen();
+		} else if (elem.msRequestFullscreen) {
+		  elem.msRequestFullscreen();
+		} else if (elem.mozRequestFullScreen) {
+		  elem.mozRequestFullScreen();
+		} else if (elem.webkitRequestFullscreen) {
+		  elem.webkitRequestFullscreen();
+		}
+	} else {
+		if (document.exitFullscreen) {
+		  document.exitFullscreen();
+		} else if (document.msExitFullscreen) {
+		  document.msExitFullscreen();
+		} else if (document.mozCancelFullScreen) {
+		  document.mozCancelFullScreen();
+		} else if (document.webkitExitFullscreen) {
+		  document.webkitExitFullscreen();
 		}
 	}
 }
