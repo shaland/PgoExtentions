@@ -1648,6 +1648,17 @@ function addMarkerToStreetView(key) {
 	console.log("★★追加:"+key);
 }
 
+//_/_/_/_/_/_/_/_/ストリートビューから、指定のマーカ削除_/_/_/_/_/_/_/_/_/_/
+function removeMarkerFromStreetView(key){
+	var i;
+	for(i=0; i<_streetViewMarkers.length;i++){
+		var marker = _streetViewMarkers[i]
+		if(marker.loc == key){
+			marker.setMap(null);
+			_streetViewMarkers.splice(i,1);
+			console.log("★★削除:"+key);
+			return;
+}
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 //_/_/_/_/_/_/_/_/フルスクリーン対応_/_/_/_/_/_/_/_/_/_/_/_/
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
