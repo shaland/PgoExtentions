@@ -920,14 +920,6 @@ function searchPokesourceMain(){
 		clearInterval(_timerIdCheckPokeFound);
 		clearInterval(_timerIdResetCounter);
 
-		_priorityPoint=[];		
-		_pokesource_list=[];
-		_center=[];
-		_prepareCount = 0;
-		_prepareOK = false;
-
-		//_priorityRectangles
-
 		//マーカーをクリア
 		var i;
 		for(i=0;i<_marker_circle.length;i++){
@@ -953,6 +945,21 @@ function searchPokesourceMain(){
     	//開始
         _isShowPokesourceMode = true;
 		$('#button_customcontrol_SearchPokeSource').css('backgroundColor', '#FFCC66');
+
+		//初期化
+		_targetList=[];
+		_isJitakuMode=false;
+		_priorityPoint=[];		
+		_priorityRectangles=[];
+
+		_pokesource_list=[];
+		_center=[];
+		_prepareCount = 0;
+		_prepareOK = false;
+
+		_marker_area = [];
+		_marker_circle=[];
+		_count = 0;
 
 		var radius=0.0005;
 
