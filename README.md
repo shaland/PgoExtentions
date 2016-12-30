@@ -44,6 +44,12 @@ ___
 3. P-GOSEARCHのページを開く  
 4. 先ほど登録したブックマークをクリック  
 
+【ポケモンGO】P-GO SEARCHの機能拡張手順が簡単になりました！ for PC  
+https://youtu.be/6DUwzxE-vlM
+
+【ポケモンGO】P-GO SEARCHの機能拡張手順が簡単になりました！ for スマホ  
+https://youtu.be/gOU-VfzezOk
+
 補足
 ---
 スマホの場合は、上記のクリックをタップ、右クリックを長押しに読み替えてください。  
