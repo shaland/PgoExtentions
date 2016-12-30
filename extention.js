@@ -217,7 +217,7 @@ function prepareGoogleMapApi(){
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 //https://github.com/hosuaby/Leaflet.SmoothMarkerBouncing
 function prepareBounceMarker(){
-	$.getScript("https://hosuaby.github.io/Leaflet.SmoothMarkerBouncing/vendor/Leaflet.SmoothMarkerBouncing/leaflet.smoothmarkerbouncing.js",
+	$.getScript("https://goo.gl/I5kLRs",
 		function(){
 			//プラグイン読み込み完了後にアニメーションデフォルト値設定
 			L.Marker.setBouncingOptions({
