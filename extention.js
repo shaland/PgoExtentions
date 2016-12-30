@@ -801,7 +801,7 @@ function showPushOnly(){
 var _marker_area = [];
 var _marker_circle = [];
 var _count=0;
-var _searchInterval=10000; //検索の間隔
+var _searchInterval=15000; //検索の間隔
 
 function searchPointByLoc(loc1,loc2){
 	var count = _count;
@@ -940,7 +940,7 @@ function searchPokesourceMain(){
 		_priorityRectangles=[];
 		
 		//画面メッセージ
-		viewTopMessage("ポケソース更新終了","・・・");	
+		viewTopMessage("ポケソース更新終了","");	
     } else {
     	//開始
         _isShowPokesourceMode = true;
@@ -1020,7 +1020,7 @@ function prepareSearchPokesource(lat,lng) {
 			_prepareOK=true;
 			//画面メッセージ
 			var modeName = _isJitakuMode ? "【自宅モード】" : "【通常モード】";
-			viewTopMessage(modeName + "ポケソース更新処理実行-ポケソース数："+_pokesource_list.length,"中央から順にチェック");	
+			viewTopMessage("自動更新-ポケソース数："+_pokesource_list.length,"");	
 			//初回実行
 			searchPokesource();
 			
