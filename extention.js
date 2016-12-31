@@ -189,10 +189,11 @@ function drawRoute(key){
 //_/_/_/_/_/_/_/_/GoogleMap追加_/_/_/_/_/_/_/_/_/_/_/_/
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 function addGoogleLayers(){
-	var gmap_hyb = new  L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {maxZoom: 21,minZoom: 6,reuseTiles: true,subdomains:['mt0','mt1','mt2','mt3']})
-	var gmap_str = new  L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {maxZoom: 21,minZoom: 6,reuseTiles: true,subdomains:['mt0','mt1','mt2','mt3']})
-	var gmap_sat = new  L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {maxZoom: 21,minZoom: 6,reuseTiles: true,subdomains:['mt0','mt1','mt2','mt3']})
-	var gmap_ter = new  L.tileLayer('https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', {maxZoom: 21,minZoom: 6,reuseTiles: true,subdomains:['mt0','mt1','mt2','mt3']})
+	var attr = '&copy;Google、ZENRIN <a href="https://www.google.com/intl/ja_jp/help/terms_maps.html" target="_blank">利用規約</a>';
+	var gmap_hyb = new  L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {maxZoom: 21,minZoom: 6,reuseTiles: true,subdomains:['mt0','mt1','mt2','mt3'],attribution:attr})
+	var gmap_str = new  L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {maxZoom: 21,minZoom: 6,reuseTiles: true,subdomains:['mt0','mt1','mt2','mt3'],attribution:attr})
+	var gmap_sat = new  L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {maxZoom: 21,minZoom: 6,reuseTiles: true,subdomains:['mt0','mt1','mt2','mt3'],attribution:attr})
+	var gmap_ter = new  L.tileLayer('https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', {maxZoom: 21,minZoom: 6,reuseTiles: true,subdomains:['mt0','mt1','mt2','mt3'],attribution:attr})
 
 	//ベースレイヤーグループ化
 	var baseMaps = {
@@ -262,16 +263,17 @@ function hoge(){requestDBServer('viewData');}
 //_/_/_/_/_/_/_/_/フッタ非表示_/_/_/_/_/_/_/_/_/_/_/_/
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 function hideFooter(){
-	$("table")[0].hidden=true;
+	//PCの場合はヘッダ部を非表示
+	if($("header").get(0).getElementsByTagName("table").length=6){	
+		$("table")[0].hidden=true;
+	}
 	$("table").css({"height":"24px","font-size":"small"});
-	$("header").css({"height":"24px"});
 	$("#area_topmessage").css({"height":"24px"});	//GPSボタンとか見えなくなるのを防ぐため
 	$("#area_map_frame").css({"margin-bottom":"0px","margin-top":"24px"});
 	adSetHidden();
-	$("#area_window_visibleinfo").css({"height": "32px"});//エラーメッセージ縮小化
 	map.invalidateSize(); 
 }
-function getFooterHeight() {return 0;} //既存メソッドをオーバライド
+function getFooterHeight() {return 24;} //既存メソッドをオーバライド
 
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 //_/_/_/_/_/_/_/_/近くのポケモン表示_/_/_/_/_/_/_/_/_/_/_/_/
@@ -371,7 +373,7 @@ function ShowNearPokemon(){
 	
 	//表示エリア描画
 	if($('#area_pokelist').size() == 0 ){
-		var html = "<div id='area_pokelist' style='display: block; position: fixed; background-color: rgba(200, 200, 255, 0.901961); z-index: 2000001; left: 50px; right: 50px; height: 48px; top: 24px; margin: 0 auto;'>"
+		var html = "<div id='area_pokelist' style='display: block; position: fixed; background-color: rgba(200, 200, 255, 0.901961); z-index: 10000; left: 100px; right: 100px; height: 48px; top: 24px; margin: 0 auto;'>"
 		html 	+= "	<div style='width:100%;height:100%;overflow-y: hidden;overflow-x: auto;-webkit-overflow-scrolling: touch; white-space:nowrap;'>"
 		html 	+= "		<div style='padding:5px;'>"
 		html 	+= "			<div id='area_pokelist_data' style='display: table-cell;vertical-align: middle;font-size: 50%;'>"
@@ -558,7 +560,7 @@ function ShowPokemonDictionary(){
 	
 	if($('#area_pokemon_dictionary').size() == 0 ){
 		//初回表示
-		var html = "<div id='area_pokemon_dictionary' style='display: block; position: fixed; background-color: rgba(200, 200, 255, 0.901961); z-index: 2000001; left: 100px; right: 100px; height: 48px; bottom: 10px; margin: 0 auto;'>"
+		var html = "<div id='area_pokemon_dictionary' style='display: block; position: fixed; background-color: rgba(200, 200, 255, 0.901961); z-index: 10000; left: 100px; right: 100px; height: 48px; bottom: 24px; margin: 0 auto;'>"
 		html 	+= "	<div style='width:100%;height:100%;overflow-y: hidden;overflow-x: auto;-webkit-overflow-scrolling: touch; white-space:nowrap;'>"
 		html 	+= "		<div style='padding:5px;'>"
 		html 	+= "			<div id='area_pokemon_dictionary_data' style='display: table-cell;vertical-align: middle;font-size: 50%;'>"
@@ -1021,7 +1023,7 @@ function prepareSearchPokesource(lat,lng) {
 			_prepareOK=true;
 			//画面メッセージ
 			var modeName = _isJitakuMode ? "【自宅モード】" : "【通常モード】";
-			viewTopMessage("自動更新-ポケソース数："+_pokesource_list.length,"");	
+			viewTopMessage("自動更新-"+_pokesource_list.length,"");	
 			//初回実行
 			searchPokesource();
 			
