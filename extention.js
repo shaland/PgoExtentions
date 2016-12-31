@@ -264,7 +264,7 @@ function hoge(){requestDBServer('viewData');}
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 function hideFooter(){
 	//PCの場合はヘッダ部を非表示
-	if($("header").get(0).getElementsByTagName("table").length=6){	
+	if($("header").get(0).getElementsByTagName("table").length == 6){	
 		$("table")[0].hidden=true;
 	}
 	$("table").css({"height":"24px","font-size":"small"});
@@ -373,7 +373,7 @@ function ShowNearPokemon(){
 	
 	//表示エリア描画
 	if($('#area_pokelist').size() == 0 ){
-		var html = "<div id='area_pokelist' style='display: block; position: fixed; background-color: rgba(200, 200, 255, 0.901961); z-index: 10000; left: 100px; right: 100px; height: 48px; top: 24px; margin: 0 auto;'>"
+		var html = "<div id='area_pokelist' style='display: block; position: fixed; background-color: rgba(200, 200, 255, 0.901961); z-index: 10000; left: 50px; right: 50px; height: 48px; top: 24px; margin: 0 auto;'>"
 		html 	+= "	<div style='width:100%;height:100%;overflow-y: hidden;overflow-x: auto;-webkit-overflow-scrolling: touch; white-space:nowrap;'>"
 		html 	+= "		<div style='padding:5px;'>"
 		html 	+= "			<div id='area_pokelist_data' style='display: table-cell;vertical-align: middle;font-size: 50%;'>"
@@ -560,7 +560,7 @@ function ShowPokemonDictionary(){
 	
 	if($('#area_pokemon_dictionary').size() == 0 ){
 		//初回表示
-		var html = "<div id='area_pokemon_dictionary' style='display: block; position: fixed; background-color: rgba(200, 200, 255, 0.901961); z-index: 10000; left: 100px; right: 100px; height: 48px; bottom: 24px; margin: 0 auto;'>"
+		var html = "<div id='area_pokemon_dictionary' style='display: block; position: fixed; background-color: rgba(200, 200, 255, 0.901961); z-index: 10000; left: 50px; right: 50px; height: 48px; bottom: 24px; margin: 0 auto;'>"
 		html 	+= "	<div style='width:100%;height:100%;overflow-y: hidden;overflow-x: auto;-webkit-overflow-scrolling: touch; white-space:nowrap;'>"
 		html 	+= "		<div style='padding:5px;'>"
 		html 	+= "			<div id='area_pokemon_dictionary_data' style='display: table-cell;vertical-align: middle;font-size: 50%;'>"
