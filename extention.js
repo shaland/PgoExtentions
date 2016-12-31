@@ -263,8 +263,9 @@ function hoge(){requestDBServer('viewData');}
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 function hideFooter(){
 	$("table")[0].hidden=true;
-	$("table").css({"height":"24px"});
+	$("table").css({"height":"24px","font-size":"small"});
 	$("header").css({"height":"24px"});
+	$("#area_topmessage").css({"height":"24px"});	//GPSボタンとか見えなくなるのを防ぐため
 	$("#area_map_frame").css({"margin-bottom":"0px","margin-top":"24px"});
 	adSetHidden();
 	$("#area_window_visibleinfo").css({"height": "32px"});//エラーメッセージ縮小化
