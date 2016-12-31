@@ -1,5 +1,5 @@
 # PgoExtentions
-##P-GO SEARCH Extentions for PC
+##P-GO SEARCH Extentions
 
 P-GO SEARCHの機能拡張となります。  
 子供が楽しめる機能を優先に実装しているので、実用性は低いです。  
