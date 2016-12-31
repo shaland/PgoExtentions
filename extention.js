@@ -804,7 +804,7 @@ function showPushOnly(){
 var _marker_area = [];
 var _marker_circle = [];
 var _count=0;
-var _searchInterval=30000; //検索の間隔
+var _searchInterval=15000; //検索の間隔
 
 function searchPointByLoc(loc1,loc2){
 	var count = _count;
