@@ -402,7 +402,7 @@ function onShownPokemonClick(id){
 	if(id == -1){
 		_currentPokeId = id;
 		_currentIndex = 0;
-		//スーパーボル時は、すべてのポケモンを表示する
+		//スーパーボール時は、すべてのポケモンを表示する
 		changeAllPokemon(true);
 	} else {
 		//クリック対象を探す
@@ -567,7 +567,7 @@ function ShowPokemonDictionary(){
 
 //		html	+= "				<img id='pokemonBall' src='" + getPokemonBallURL() + "' style='width:25px; cursor:pointer;' onclick='onDictionalyBallClick();' oncontextmenu='return false;'>";
 
-		for (var i=1; i<=151; i++){
+		for (var i=1; i<=251; i++){
 			html += "					<img id='pokemon_dictionary_" + i  + "' src='" + getIconImage(i) + "' style='width:25px; cursor:pointer;' onclick='onPokemonDictionaryClick(\""+ i + "\");' oncontextmenu='onPokemonDictionaryRightClick(\""+ i + "\"); return false;'>";
 			html += "					<span id='tip_" + i + "' style='width: 500px;'></span>";
 		}	
@@ -577,33 +577,6 @@ function ShowPokemonDictionary(){
 		html 	+= "	</div>";
 		html 	+= "</div>";
 		$('body').append(html);
-		
-		//画像のホバー処理
-		for (var i=1; i<=151; i++){
-			$("#pokemon_dictionary_" + i).hover(function(){
-				if($('#tip_' + i).size==0) return;
-				$('#tip_' + i).show();
-			}, function() {
-				$('#tip_' + i).hide();
-			}).mousemove(function(e) {
-				var tip = $('#tip_' + i);
-				var mousex = e.pageX + 20; //Get X coodrinates
-				var mousey = e.pageY + 20; //Get Y coordinates
-				var tipWidth = tip.width(); //Find width of tooltip
-				var tipHeight = tip.height(); //Find height of tooltip
-
-				var tipVisX = $(window).width() - (mousex + tipWidth);
-				var tipVisY = $(window).height() - (mousey + tipHeight);
-
-				if ( tipVisX < 20 ) { //If tooltip exceeds the X coordinate of viewport
-					mousex = e.pageX - tipWidth - 20;
-				} if ( tipVisY < 20 ) { //If tooltip exceeds the Y coordinate of viewport
-					mousey = e.pageY - tipHeight - 20;
-				}
-
-				tip.css({  top: mousey, left: mousex });
-			});
-		}
 	} else {
 		//二回目以降表示
 		$('#area_pokemon_dictionary').show();
@@ -615,104 +588,6 @@ function onPokemonDictionaryClick(id){
 	jumpSearchMobList(id);
 }
 
-//_/_/_/_/_/_/_/_/ポケモン辞書の右クリック時_/_/_/_/_/_/_/_/_/_/
-function onPokemonDictionaryRightClick(id){
-}
-
-//_/_/_/_/_/_/_/_/ポケモン辞書ボール右クリック時_/_/_/_/_/_/_/_/_/_/
-var _interval_searchNearestPokemon;
-function onDictionalyBallClick(){
-	//既に実行済みの場合はスキップ
-	if(_interval_searchNearestPokemon) return;
-	
-	//全てのポケモン状況を確認
-	var pid=1;
-	var loc1 = -1;
-	var loc2 = -1;
-	if (gpslog_loc) {
-		loc1 = gpslog_loc.latitude;
-		loc2 = gpslog_loc.longitude;
-	} else {
-		var latlng = getCenterMap();
-		loc1 = latlng[0];
-		loc2 = latlng[1];
-	}
-
-	//全てのポケモンを確認
-	_interval_searchNearestPokemon = setInterval(function(){
-		searchNearestPokemon(loc1,loc2,pid);
-		pid++;
-		if(151<pid){
-			clearInterval(_interval_searchNearestPokemon);
-			_interval_searchNearestPokemon=null;
-		}
-	},5000);
-}
-
-//_/_/_/_/_/_/_/_/最寄りのポケモン検索_/_/_/_/_/_/_/_/_/_/
-function searchNearestPokemon(loc1,loc2,pid){
-	console.log("■■最寄りのポケモン検索："+pid);
-
-	$.ajax({
-	    url: "https://"+using_dbserver+"/_dbserver.php?uukey=c2e316f11149c3f8e1ff5da39efe46de&sysversion=1000&action=getSearchMob&pid="+pid+"&loc1="+encodeURIComponent(parseFloat(loc1))+"&loc2="+encodeURIComponent(parseFloat(loc2)),
-	    type: "GET",
-	    data: "",
-	    timeout: 10000,
-	    cache: false
-	}).done(function(data, status, xhr) {
-		console.log("■■最寄りのポケモン取得："+pid);
-
-		var _viewhtml = "";
-		if (data.indexOf("action=found_searchmob;") != -1) {				
-			var data = data.split("\n");
-			for (var i=0; i<data.length; i++) {
-				var _ent = parseValue(data[i]);
-				if (_ent["action"] == "found_searchmob") {
-					var _loc = _ent["loc"].split(",");
-					
-			   		var _addmsg = "";
-			   		var _bgcolor = "rgba(251,157,0,0.8)";
-			   		
-					_addmsg += "残り"+viewLeftToL(_ent["tol"])+" ";
-			   		
-					if (gpslog_loc) {
-						var _meter = parseInt(getDistance(gpslog_loc.latitude, gpslog_loc.longitude, parseFloat(_loc[0]), parseFloat(_loc[1])));
-						_addmsg += "<br>("+viewmeter(_meter)+")";
-						
-						try{
-							var _movetime = MeterToMoveMethodSec(_meter,4);
-							if (configpush_movemethod) {
-								_movetime = MeterToMoveMethodSec(_meter,parseInt(configpush_movemethod));
-							}
-							if ((new Date()).getTime() + _movetime * 1000 <= parseInt(_ent["tol"])) {
-								_bgcolor = "rgba(251,157,0,0.8)";
-							} else {
-								_bgcolor = "rgba(221,216,213,0.5)";
-							}
-						} catch(e) {
-							console.log("error: 移動手段検出(searchmobhit):"+e);
-						}
-						
-					}
-			   		
-			   		_viewhtml += "<div id='area_searchmobhit_item_"+i+"' style='font-size:90%;width:100%;cursor:pointer;padding:3px;margin:3px;margin-bottom:10px;background-color:"+_bgcolor+";' onclick='jumpMapArea(\""+_ent["loc"]+"\");'>"+_addmsg+"</div>";
-
-				}
-			}
-		}
-			
-		if (_viewhtml != "") {
-			_viewhtml = "<div style='font-size:90%;'>最寄りの<br>"+pokemon_table_ja[pid]+"</div>"+_viewhtml;
-		} else {
-			_viewhtml = "<div style='font-size:90%;'>検索結果がありませんでした。近くに「"+pokemon_table_ja[pid]+"」は出現(捕捉)していないようです。</div>";
-		}
-		
-		$('#tip_' + pid).html(_viewhtml);
-
-	}).fail(function(xhr, status, error) {
-		console.log("■■■やっぱりエラー" + error);
-	});
-}
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 //_/_/_/_/_/_/_/_/ポッポコラッタ以外表示_/_/_/_/_/_/_/_/_/_/_/_/
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
@@ -747,12 +622,15 @@ function addCustomControlShowPokemonWithoutWimp(){
 
 //雑魚（ポッポ、コラッタ）以外を表示
 function showPokemonWithoutWimp(){
+prepareRecord();
+/*
 	//すべてを表示する
 	changeAllPokemon(true);
 	
 	//ポッポ、コラッタを非表示
 	toggleConfigViewList(16);//ポッポ
 	toggleConfigViewList(19);//コラッタ
+*/
 }
 
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
@@ -1419,7 +1297,7 @@ function addCustomControlStreetView(){
 			onAdd: function (map) {
 				var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom leaflet-control-command-interior');
 					container.id = "button_customcontrol_ShowStreetView";
-					container.innerHTML = "ストリート表示";
+					container.innerHTML = "StreetView";
 					container.style.backgroundColor = 'white';
 					container.style.width = '80px';
 					container.style.height = '20px';
@@ -1756,4 +1634,257 @@ function toggleFullScreen(full){
 		  document.webkitExitFullscreen();
 		}
 	}
+}
+
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+//_/_/_/_/_/_/_/_/音声認識_/_/_/_/_/_/_/_/_/_/_/_/
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+var _isSpeakMode = true;
+var _isRecording = false;
+//_/_/_/_/_/_/_/_/音声認識事前準備_/_/_/_/_/_/_/_/_/_/
+function prepareRecord(){
+	//メッセージエリア作成
+	if($('#area_window_recordinfo').size() == 0 ){
+		var html = '<div id="area_window_recordinfo" style="position:fixed;background-color:rgba(255,202,202,1);padding:0px;z-index:1000200;bottom:0px;left:0px;right:0px;height:25px;display:block;">'
+		html += '<TABLE border="0" width="100%" height="24" cellpadding="0" cellspacing="0">'
+		html += '	<TR>'
+		html += '	<TD align="center" valign="middle">'
+		html += '		<span id="area_window_recordinfo_message" style="font-weight:bold;color:red;font-size:70%;">「ポケモンＧＯ！」で認識開始</span>'
+		html += '	</TD>'
+		html += '	</TR>'
+		html += '</TABLE>'
+    	html += '</div>'
+
+		$('body').append(html);
+	} else {
+		$('#area_window_recordinfo').css({"display": "block"});
+	}
+	
+	//リッスン開始
+	startRecord();
+}
+
+//_/_/_/_/_/_/_/_/音声認識切り替え_/_/_/_/_/_/_/_/_/_/
+function toggleRecord(isStart){
+    if(isStart){
+        //開始
+        _isRecording=true;
+        $("#area_window_recordinfo_message").text("認識中…");
+    } else{
+        //停止
+        _isRecording=false;
+        $("#area_window_recordinfo_message").text("「ポケモンＧＯ！」で認識開始");
+    }
+}
+
+//_/_/_/_/_/_/_/_/音声認識開始/_/_/_/_/_/_/_/_/_/
+function startRecord(){
+    //音声認識モードがOFFなら処理しない
+    if(!_isSpeakMode) return;
+     
+    window.SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
+
+	//未対応時
+	if(!window.SpeechRecognition) {
+    	$("#area_window_recordinfo_message").text("音声認識未対応");
+		return;
+	}
+	
+    var recognition = new window.SpeechRecognition();
+
+    recognition.lang = 'ja';
+    recognition.interimResults = true; //順次録音
+
+    //録音状況に応じての対応
+    recognition.onsoundstart = function(){
+        console.log("認識開始");
+    };
+    recognition.onnomatch = function(){
+        console.log("認識不明");
+//        startRecord();           
+    };
+    recognition.onerror= function(){
+        console.log("認識エラー");
+        //無言エラーの時は再度リッスン
+        if(event.error == "no-speech") {
+            startRecord();
+		} else if(event.error == "not-allowed"){
+        	$("#area_window_recordinfo_message").text("音声認識が許可されていません");
+        	_isSpeakMode = false;
+        } else {
+        	$("#area_window_recordinfo_message").text("音声認識エラー:" + event.error);
+        	_isSpeakMode = false;
+        }
+    };
+    recognition.onsoundend = function(){
+        console.log("認識終了");
+        //終了時は、引き続き次のリッスン
+        startRecord();
+    };
+    
+    //認識結果
+    recognition.onresult = function(event){
+        var results = event.results;
+        var message = results[0][0].transcript;
+
+        if(results[0].isFinal){
+            if(_isRecording){
+                $("#area_window_recordinfo_message").text(message);
+                doActionByMessage(message);
+                toggleRecord(false);
+            } else if(message=="ポケモン go"){
+               toggleRecord(true);
+            }
+        } else {
+            if(_isRecording){
+                $("#area_window_recordinfo_message").text("(解析中)" +message);
+            }
+        }
+    };
+    recognition.start();
+}
+
+//_/_/_/_/_/_/_/_/メッセージをもとにアクション実行/_/_/_/_/_/_/_/_/_/
+function doActionByMessage(message){
+    var result = false;
+
+    //^:先頭マッチ　$：末尾マッチ
+    var actionList = {
+        "showAllPokemon":["全部表示して.*","全部表示する$","全部出して.*","全部出す$","全表示して.*","全表示$"],
+        "hideAllPokemon":["全部非表示にして.*","全部非表示にする$","全部消して.*","全部消す$","全部隠して.*","全部隠す$","全非表示にして.*","全非表示$"],
+        "showOnlyOnePokemon":["だけを?表示して.*","だけを?表示する$","だけ表示$","だけ出して.*","だけ出す$"],
+        "showPokemon":["表示して.*","表示する$","表示$","出して.*","出す$"],
+        "hidePokemon":["非表示にして.*","非表示にする$","消して.*","消す$","隠して.*","隠す$"]
+    };
+    
+    //アクションを検索
+    var action = "Unknown";
+    L: for(var key in actionList) {
+        console.log("key:" + key);
+        var actions = actionList[key];
+        for(var i=0;i<=actions.length-1;i++){
+            console.log("debug:"  + actions[i]);
+            if(message.match(actions[i])){
+               console.log("action:" + key + " by-" + actions[i]);
+                action = key;
+                break L;
+            }
+        }
+    }
+    
+    console.log("Action：" + action);
+    
+    //アクションにより処理を分ける
+    switch(action){
+        case "showAllPokemon":
+            break;
+        case "hideAllPokemon":
+            break;
+        case "showOnlyOnePokemon":
+            result = showOnlyOnePokemonByMessage(message);
+            break;
+        case "showPokemon":
+            break;
+        case "hidePokemon":
+            break;
+    }
+}
+        
+//_/_/_/_/_/_/_/_/メッセージをもとに一匹のポケモンだけ表示/_/_/_/_/_/_/_/_/_/
+function showOnlyOnePokemonByMessage(message){
+    //「だけ」の前がポケモン名
+    var pokeName = message.split("だけ")[0];
+    
+    //ポケモンIDを名前より取得
+    var pokemonId = getPokemonIdByName(pokeName);
+
+    console.log("Pokemon：" + pokeName + "(" + pokemonId + ")");
+
+    
+    //ポケモンIDが取得できなければ終了
+    if(pokemonId == -1) return false;
+
+    //対象のポケモンのみ表示する
+	changeAllPokemon(false);
+	toggleConfigViewList(pokemonId);
+    
+    return true;
+}
+
+//_/_/_/_/_/_/_/_/ポケモン名からポケモン正式名称を取得/_/_/_/_/_/_/_/_/_/
+function getPokemonIdByName(pokeName){
+    console.log("getPokemonIdByName:" + pokeName);
+
+    //ポケモン名の揺らぎを修正
+    pokeName = convertPokemonName(pokeName);
+    
+    //ポケモンリストから一致するIDを検索して返す
+	for(var i=1; i<=151; i++) {
+        if(pokeName == pokemon_table_ja[i]) return i;
+    }
+    
+    //見つからなければ-1を返す
+    return -1;
+}
+
+//_/_/_/_/_/_/_/_/ポケモン名変換/_/_/_/_/_/_/_/_/_/
+function convertPokemonName(pokeName){
+    var convertList = {
+        "ヒトカゲ":["人影"],
+        "カメール":["亀戸"],
+        "カメックス":["カメ エクス"],
+        "ピジョット":["リゾット"],
+        "コラッタ":["もらった"],
+        "ラッタ":["あった","だった","バッタ","待った"],
+        "ニドラン♀":["ニドランメス","ニドラン 女"],
+        "ニドラン♂":["ニドランオス","ニドラン 男"],
+        "ニドリーノ":["緑の","みどりいぬ"],
+        "キュウコン":["球根"],
+        "プクリン":["ぽこりん","北鈴"],
+        "クサイハナ":["臭い花"],
+        "コンパン":["アンパン","根本"],
+        "ニャース":["ニュース","ピアス","宮津"],
+        "マンキー":["ファンキー","満期"],
+        "ガーディ":["ガーディー"],
+        "ウィンディ":["ウィンディー","windy"],
+        "ケーシィ":["kc"],
+        "フーディン":["風鈴"],
+        "ゴーリキー":["剛力"],
+        "カイリキー":["怪力"],
+        "コイル":["ホイール"],
+        "ジュゴン":["ズボン"],
+        "ゲンガー":["電話"],
+        "タマタマ":["たまたま"],
+        "ナッシー":["なっしー","なすしお"],
+        "サワムラー":["沢村"],
+        "エビワラー":["海老原"],
+        "サイドン":["sidem"],
+        "タッツー":["たっつ"],
+        "アズマオウ":["東"],
+        "スターミー":["スター ミー"],
+        "エレブー":["セレブ"],
+        "ブーバー":["ウーバー","ブラ"],
+        "イーブイ":["av","ev"],
+        "オムスター":["ハムスター","モンスター"],
+        "カブト":["兜"],
+        "プテラ":["ホテル"],
+        "フリーザー":["フリーザ"],
+        "ハウクリュー":["白竜"],
+        "カイリュー":["海流"]
+    };
+    
+    //空白除去
+    pokeName = pokeName.trim();
+    
+    //ポケモン名称変換
+    for(var key in convertList){
+        var convertNames = convertList[key];
+        for(var i=0;i<=convertNames.length-1;i++){
+            if(pokeName == convertNames[i]) return key; //置き換えがあった場合は置き換え
+        }
+    }
+    
+    //元の名称を返却
+    return pokeName;
 }
