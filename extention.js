@@ -1646,7 +1646,7 @@ var _isRecording = false;
 function prepareRecord(){
 	//メッセージエリア作成
 	if($('#area_window_recordinfo').size() == 0 ){
-		var html = '<div id="area_window_recordinfo" style="position:fixed;background-color:rgba(255,202,202,1);padding:0px;z-index:1000200;bottom:0px;left:0px;right:0px;height:25px;display:none;">'
+		var html = '<div id="area_window_recordinfo" style="position:fixed;background-color:rgba(255,202,202,1);padding:0px;z-index:1000200;bottom:0px;left:0px;right:0px;height:25px;display:block;">'
 		html += '<TABLE border="0" width="100%" height="24" cellpadding="0" cellspacing="0">'
 		html += '	<TR>'
 		html += '	<TD align="center" valign="middle">'
@@ -1774,19 +1774,39 @@ function doActionByMessage(message){
     //アクションにより処理を分ける
     switch(action){
         case "showAllPokemon":
+        	result = showAllPokemonByMessage(message);
             break;
         case "hideAllPokemon":
+        	resutl = hideAllPokemonByMessage(message);
             break;
         case "showOnlyOnePokemon":
             result = showOnlyOnePokemonByMessage(message);
             break;
         case "showPokemon":
+        	result = showPokemonByMessage(message);
             break;
         case "hidePokemon":
+        	result = hidePokemonByMessage(message);
             break;
     }
 }
-        
+
+//_/_/_/_/_/_/_/_/メッセージをもとに全てのポケモンを表示/_/_/_/_/_/_/_/_/_/
+function showAllPokemonByMessage(message){
+    //対象のポケモンのみ表示する
+	changeAllPokemon(true);
+	
+	return true;
+}
+
+//_/_/_/_/_/_/_/_/メッセージをもとに全てのポケモンを非表示/_/_/_/_/_/_/_/_/_/
+function hideAllPokemonByMessage(message){
+    //対象のポケモンのみ表示する
+	changeAllPokemon(false);
+
+	return true;
+}
+
 //_/_/_/_/_/_/_/_/メッセージをもとに一匹のポケモンだけ表示/_/_/_/_/_/_/_/_/_/
 function showOnlyOnePokemonByMessage(message){
     //「だけ」の前がポケモン名
@@ -1806,6 +1826,58 @@ function showOnlyOnePokemonByMessage(message){
 	toggleConfigViewList(pokemonId);
     
     return true;
+}
+
+//_/_/_/_/_/_/_/_/メッセージをもとにポケモンを表示/_/_/_/_/_/_/_/_/_/
+function showPokemonByMessage(message){
+	//「を」の前がポケモン名
+    var pokeName = message.split("を")[0];
+
+    //ポケモンIDを名前より取得
+    var pokemonId = getPokemonIdByName(pokeName);
+
+    console.log("Pokemon：" + pokeName + "(" + pokemonId + ")");
+
+    //ポケモンIDが取得できなければ終了
+    if(pokemonId == -1) return false;
+
+	//未定義なら、表示扱いとする
+	if(!config_viewlist[pokemonId]) {
+		config_viewlist[pokemonId] = "0";
+	}
+	
+	//非表示なら表示に切り替え
+	if(config_viewlist[pokemonId] == "1"){
+		toggleConfigViewList(pokemonId);
+	}
+
+	return true;
+}
+
+//_/_/_/_/_/_/_/_/メッセージをもとにポケモンを非表示/_/_/_/_/_/_/_/_/_/
+function hidePokemonByMessage(message){
+	//「を」の前がポケモン名
+    var pokeName = message.split("を")[0];
+
+    //ポケモンIDを名前より取得
+    var pokemonId = getPokemonIdByName(pokeName);
+
+    console.log("Pokemon：" + pokeName + "(" + pokemonId + ")");
+
+    //ポケモンIDが取得できなければ終了
+    if(pokemonId == -1) return false;
+
+	//未定義なら、表示扱いとする
+	if(!config_viewlist[pokemonId]) {
+		config_viewlist[pokemonId] = "0";
+	}
+	
+	//表示なら非表示に切り替え
+	if (config_viewlist[pokemonId] == "0"){
+		toggleConfigViewList(pokemonId);
+	}
+
+	return true;
 }
 
 //_/_/_/_/_/_/_/_/ポケモン名からポケモン正式名称を取得/_/_/_/_/_/_/_/_/_/
