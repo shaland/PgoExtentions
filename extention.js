@@ -1817,7 +1817,7 @@ function getPokemonIdByName(pokeName){
     
     //ポケモンリストから一致するIDを検索して返す
 	for(var i=1; i<=151; i++) {
-        if(pokeName == pokemon_table_ja[i]) return i;
+        if(pokemon_table_ja[i].match(pokeName + " *([\\(\\<].*|$)")) return i;
     }
     
     //見つからなければ-1を返す
