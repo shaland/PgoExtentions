@@ -1674,16 +1674,17 @@ function toggleSpeechRecognition(){
 	if(_isSpeechRecognitionMode) {
 		//停止
 		$('#button_customcontrol_toggleSpeechRecognition').css('backgroundColor', 'white');
-		stopSpeechRecognition();
+        //音声認識終了
         _isSpeechRecognitionMode = false;
+		stopSpeechRecognition();
     } else {
     	//開始
 		$('#button_customcontrol_toggleSpeechRecognition').css('backgroundColor', '#FFCC66');
 		//開始準備
 		prepareSpeechRecognition();
-		//リッスン開始
-		startSpeechRecognition();
+		//音声認識開始
         _isSpeechRecognitionMode = true;
+		startSpeechRecognition();
     }
 }
 
