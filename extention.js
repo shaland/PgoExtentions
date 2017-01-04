@@ -21,7 +21,7 @@ function startExtention(){
 //	$("#button_customcontrol_area").remove();
 	
 	//地図ジャンプを小さく
-	$("#button_customcontrol_area").css({"height":"32px","width":"32px","background-image":"url(https://img-pmap.aquapal-cdn.net/img/icon_area.png)", "background-size":"cover"});;
+	$("#button_customcontrol_area").css({"height":"32px","width":"32px","background-image":"url(https://img-pmap.aquapal-cdn.net/img/icon_area.png)", "background-size":"cover"});
 	$("#button_customcontrol_area").find("img").remove();
 	
 	//出現記録ボタンを小さく
@@ -51,11 +51,12 @@ function startExtention(){
 	
 	//カスタムコントロール追加
 	addCustomControlShowNearPokemon();
-	addCustomControlStreetView()
+	addCustomControlStreetView();
 	addCustomControlSearchPokeSource();
 
 	addCustomControlShowFullScreen();
-	addCustomControlShowPokemonWithoutWimp();
+//	addCustomControlShowPokemonWithoutWimp();
+	addCustomControlToggleSpeechRecognition();
 	addCustomControlShowPushOnly();
 	addCustomControlShowPokemonDictionary();
 	
@@ -77,7 +78,7 @@ function startExtention(){
 	layerControlElement.getElementsByTagName('input')[2].click();	//マップレイヤのチェックボックスの2つ目を選択
 	
 	//近くのポケモンクリック(いきなりすぎると表示まで時間かかるのでディレイ)
-	setTimeout(function(){$("#button_customcontrol_ShowNearPokemon").click();},3000)
+	setTimeout(function(){$("#button_customcontrol_ShowNearPokemon").click();},3000);
 }
 
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
@@ -86,17 +87,17 @@ function startExtention(){
 //全てのポケモンの表示、非表示を変更
 function changeAllPokemon(isShow){
 	//スタイル未定義エラー回避のため、一度も処理されていない場合はスタイルをダミーで作成
-	if($.trim($("#area_customcontrol_config_data_list").html()) == ""){
+	if($.trim($("#area_customcontrol_config_data_list").html()) === ""){
 		var viewhtml = "";
 		for (var i=1; i<=151; i++) {
 			viewhtml += "<div id='area_configwindow_list_"+i+"' style='width:260px;' ></div>";
 		}
 		$("#area_customcontrol_config_data_list").html(viewhtml);
-	};
+	}
 	
 	//すべてを変更
 	allChangeConfigView(isShow?0:1); //allChangeConfigViewは、表示が0、非表示が1
-};
+}
 
 //指定キーのポケモンまでのルートを表示
 var _rootLine;
@@ -120,7 +121,7 @@ function drawRoute(key){
 		var center = getCenterMap();
 		lat = center[0];
 		lng = center[1];
-	};
+	}
 
 	var loc = key.split(",");
 		
@@ -129,7 +130,7 @@ function drawRoute(key){
 	var destination = new google.maps.LatLng(loc[0],loc[1]);						//目的地
 	var mode = google.maps.TravelMode.DRIVING;					//交通手段 driving/walking/bicycling
 
-	var directionsService = new google.maps.DirectionsService;
+	var directionsService = new google.maps.DirectionsService();
 	directionsService.route({
 	    	origin: origin,
 	    	destination: destination,
@@ -144,7 +145,7 @@ function drawRoute(key){
 			//ポイントを検索
 			for(var i=0; i< response.routes[0].overview_path.length; i++){
 				var path = response.routes[0].overview_path[i];
-				if(i==0){
+				if(i === 0){
 					//開始点を追加
 					points.push([path.lat(),path.lng()]);
 				}
@@ -155,7 +156,7 @@ function drawRoute(key){
 			var color;
 			var message;
 			
-			if((new Date()).getTime()/1000 + response.routes[0].legs[0].duration.value <= pokemon_list[key]["tol"]/1000){
+			if((new Date()).getTime()/1000 + response.routes[0].legs[0].duration.value <= pokemon_list[key].tol/1000){
 				//間に合う
 				color = "green";
 				message = "◎間に合う！";
@@ -185,7 +186,7 @@ function drawRoute(key){
 		} else {
 			viewServerError("ルートステータスエラー");
 			console.log("★★ステータス値異常" + status);
-		};
+		}
 	});
 }
 
@@ -194,10 +195,10 @@ function drawRoute(key){
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 function addGoogleLayers(){
 	var attr = '&copy;Google、ZENRIN <a href="https://www.google.com/intl/ja_jp/help/terms_maps.html" target="_blank">利用規約</a>';
-	var gmap_hyb = new  L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {maxZoom: 21,minZoom: 6,reuseTiles: true,subdomains:['mt0','mt1','mt2','mt3'],attribution:attr})
-	var gmap_str = new  L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {maxZoom: 21,minZoom: 6,reuseTiles: true,subdomains:['mt0','mt1','mt2','mt3'],attribution:attr})
-	var gmap_sat = new  L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {maxZoom: 21,minZoom: 6,reuseTiles: true,subdomains:['mt0','mt1','mt2','mt3'],attribution:attr})
-	var gmap_ter = new  L.tileLayer('https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', {maxZoom: 21,minZoom: 6,reuseTiles: true,subdomains:['mt0','mt1','mt2','mt3'],attribution:attr})
+	var gmap_hyb = new  L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {maxZoom: 21,minZoom: 6,reuseTiles: true,subdomains:['mt0','mt1','mt2','mt3'],attribution:attr});
+	var gmap_str = new  L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {maxZoom: 21,minZoom: 6,reuseTiles: true,subdomains:['mt0','mt1','mt2','mt3'],attribution:attr});
+	var gmap_sat = new  L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {maxZoom: 21,minZoom: 6,reuseTiles: true,subdomains:['mt0','mt1','mt2','mt3'],attribution:attr});
+	var gmap_ter = new  L.tileLayer('https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', {maxZoom: 21,minZoom: 6,reuseTiles: true,subdomains:['mt0','mt1','mt2','mt3'],attribution:attr});
 
 	//ベースレイヤーグループ化
 	var baseMaps = {
@@ -237,7 +238,7 @@ function prepareBounceMarker(){
 					marker._bouncingMotion = {
             			isBouncing: false
         			};
-        			marker._calculateTimeline()
+        			marker._calculateTimeline();
 				}
 			}
 
@@ -304,7 +305,7 @@ function addCustomControlShowNearPokemon(){
 
 					container.onclick = function(){
 		      			ShowNearPokemonMain();
-		    		}
+		    		};
 		    	return container;
 		  	},
 		});
@@ -318,7 +319,7 @@ function ShowNearPokemonMain(){
 		//停止
 		$('#button_customcontrol_ShowNearPokemon').css('backgroundColor', 'white');
         clearInterval(_interval_ShowNearPokemon);
-		if($('#area_pokelist').size() != 0 ) $('#area_pokelist').remove();
+		if($('#area_pokelist').size() !== 0 ) $('#area_pokelist').remove();
         _shownPokeFlag = false;
     } else {
     	//開始
@@ -342,14 +343,14 @@ function ShowNearPokemon(){
 	//すべてのリストを対象に処理
 	for (var i in pokemon_list) {
 		if (!pokemon_list[i]) continue;							//リストが未存在ならスキップ
-		if (pokemon_list[i]["delete"]) continue;				//リストが削除済みであればスキップ
-		if (pokemon_list[i]["action"] != "found") continue;		//ポケモン以外であればスキップ
+		if (pokemon_list[i].delete) continue;				//リストが削除済みであればスキップ
+		if (pokemon_list[i].action != "found") continue;		//ポケモン以外であればスキップ
 		if (checkBoundsDiffOver(i)) continue;					//画面外であればスキップ
 		
 		if(!_shownList[pokemon_list[i].id]){
 			//初めての場合、オブジェクトを登録
 //			console.log(pokemon_list[i].loc);
-			pokeList = new Array();
+			pokeList = [];
 			pokeList.push(pokemon_list[i]);
 			_shownList[pokemon_list[i].id]={"id": pokemon_list[i].id, "count": 1, "pokeList": pokeList};
 		} else {
@@ -373,14 +374,14 @@ function ShowNearPokemon(){
 
 		//３．IDの降順
 		return b.id - a.id;
-	})
+	});
 	
 	//表示エリア描画
-	if($('#area_pokelist').size() == 0 ){
-		var html = "<div id='area_pokelist' style='display: block; position: fixed; background-color: rgba(200, 200, 255, 0.901961); z-index: 10000; left: 50px; right: 50px; height: 48px; top: 24px; margin: 0 auto;'>"
-		html 	+= "	<div style='width:100%;height:100%;overflow-y: hidden;overflow-x: auto;-webkit-overflow-scrolling: touch; white-space:nowrap;'>"
-		html 	+= "		<div style='padding:5px;'>"
-		html 	+= "			<div id='area_pokelist_data' style='display: table-cell;vertical-align: middle;font-size: 50%;'>"
+	if($('#area_pokelist').size() === 0 ){
+		var html = "<div id='area_pokelist' style='display: block; position: fixed; background-color: rgba(200, 200, 255, 0.901961); z-index: 10000; left: 50px; right: 50px; height: 48px; top: 24px; margin: 0 auto;'>";
+		html 	+= "	<div style='width:100%;height:100%;overflow-y: hidden;overflow-x: auto;-webkit-overflow-scrolling: touch; white-space:nowrap;'>";
+		html 	+= "		<div style='padding:5px;'>";
+		html 	+= "			<div id='area_pokelist_data' style='display: table-cell;vertical-align: middle;font-size: 50%;'>";
 		html 	+= "			</div>";
 		html 	+= "		</div>";
 		html 	+= "	</div>";
@@ -390,15 +391,15 @@ function ShowNearPokemon(){
 	}
 
 	//データ描画
-	html = "					<img id='pokemonBall' src='" + getPokemonBallURL() + "' style='width:25px; cursor:pointer;' onclick='onShownPokemonClick(-1);' oncontextmenu='onShownPokemonRightClick(-1); return false;'>";
+	var htmlData = "    <img id='pokemonBall' src='" + getPokemonBallURL() + "' style='width:25px; cursor:pointer;' onclick='onShownPokemonClick(-1);' oncontextmenu='onShownPokemonRightClick(-1); return false;'>";
 
 	for (i=0;i<_shownList.length;i++){
 		if(!_shownList[i]) continue;	
 		
-		html += "				<img src='" + getIconImage(_shownList[i].id) + "' style='width:25px; cursor:pointer;' onclick='onShownPokemonClick(\""+ _shownList[i].id + "\");' oncontextmenu='onShownPokemonRightClick(\""+ _shownList[i].id + "\"); return false;'>" + _shownList[i].count;
+		htmlData += "	<img src='" + getIconImage(_shownList[i].id) + "' style='width:25px; cursor:pointer;' onclick='onShownPokemonClick(\""+ _shownList[i].id + "\");' oncontextmenu='onShownPokemonRightClick(\""+ _shownList[i].id + "\"); return false;'>" + _shownList[i].count;
 	}	
 	
-	$('#area_pokelist_data').html(html);
+	$('#area_pokelist_data').html(htmlData);
 }
 
 //近くのポケモンのクリック時
@@ -453,7 +454,7 @@ function onShownPokemonClick(id){
 		if(_isStreetViewMode){
 			if(pokemon_list[poke.loc]){
 				//ストリートビューの位置を変更
-				moveToPokemon(pokemon_list[poke.loc]["overlay"]);
+				moveToPokemon(pokemon_list[poke.loc].overlay);
 			}
 		}
 	}
@@ -474,9 +475,9 @@ function onShownPokemonRightClick(id){
 				//全てのポケモンにアニメーションを設定
 					for(var key in _shownList[i].pokeList){
 						var poke = _shownList[i].pokeList[key];
-						if(pokemon_list[poke.loc] && pokemon_list[poke.loc]["overlay"] && pokemon_list[poke.loc]["overlay"]._map){
+						if(pokemon_list[poke.loc] && pokemon_list[poke.loc].overlay && pokemon_list[poke.loc].overlay._map){
 							//バウンズアニメーションを設定
-							pokemon_list[poke.loc]["overlay"].bounce(3);//bounce "n" times
+							pokemon_list[poke.loc].overlay.bounce(3);//bounce "n" times
 						}
 					}					
 				break;
@@ -498,7 +499,7 @@ function changePokemonBall(){
 var _pokemonBallUrlList = [];
 function getPokemonBallURL(){
 	//初回の場合のみURLをセットする
-	if(_pokemonBallUrlList.length==0){
+	if(_pokemonBallUrlList.length === 0){
 		_pokemonBallUrlList =[
 			"https://renote.s3.amazonaws.com/uploads/article_image/file/46018/CORKYm-UkAAwgGm.png",
 			"https://renote.s3.amazonaws.com/uploads/article_image/file/46028/i320.jpeg",
@@ -538,7 +539,7 @@ function addCustomControlShowPokemonDictionary(){
 
 					container.onclick = function(){
 		      			ShowPokemonDictionaryMain();
-		    		}
+		    		};
 		    	return container;
 		  	},
 		});
@@ -550,7 +551,7 @@ function ShowPokemonDictionaryMain(){
 	if(_shownPokemonDictionary) {
 		//停止
 		$('#button_customcontrol_ShowPokemonDictionary').css('backgroundColor', 'white');
-		if($('#area_pokemon_dictionary').size() != 0 ) $('#area_pokemon_dictionary').hide();
+		if($('#area_pokemon_dictionary').size() !== 0 ) $('#area_pokemon_dictionary').hide();
         _shownPokemonDictionary = false;
     } else {
     	//開始
@@ -562,12 +563,12 @@ function ShowPokemonDictionaryMain(){
 
 function ShowPokemonDictionary(){
 	
-	if($('#area_pokemon_dictionary').size() == 0 ){
+	if($('#area_pokemon_dictionary').size() === 0 ){
 		//初回表示
-		var html = "<div id='area_pokemon_dictionary' style='display: block; position: fixed; background-color: rgba(200, 200, 255, 0.901961); z-index: 10000; left: 50px; right: 50px; height: 48px; bottom: 24px; margin: 0 auto;'>"
-		html 	+= "	<div style='width:100%;height:100%;overflow-y: hidden;overflow-x: auto;-webkit-overflow-scrolling: touch; white-space:nowrap;'>"
-		html 	+= "		<div style='padding:5px;'>"
-		html 	+= "			<div id='area_pokemon_dictionary_data' style='display: table-cell;vertical-align: middle;font-size: 50%;'>"
+		var html = "<div id='area_pokemon_dictionary' style='display: block; position: fixed; background-color: rgba(200, 200, 255, 0.901961); z-index: 10000; left: 50px; right: 50px; height: 48px; bottom: 24px; margin: 0 auto;'>";
+		html 	+= "	<div style='width:100%;height:100%;overflow-y: hidden;overflow-x: auto;-webkit-overflow-scrolling: touch; white-space:nowrap;'>";
+		html 	+= "		<div style='padding:5px;'>";
+		html 	+= "			<div id='area_pokemon_dictionary_data' style='display: table-cell;vertical-align: middle;font-size: 50%;'>";
 
 //		html	+= "				<img id='pokemonBall' src='" + getPokemonBallURL() + "' style='width:25px; cursor:pointer;' onclick='onDictionalyBallClick();' oncontextmenu='return false;'>";
 
@@ -617,7 +618,7 @@ function addCustomControlShowPokemonWithoutWimp(){
 					container.onclick = function(){
 						console.log('buttonClicked');
 		      			showPokemonWithoutWimp();
-		    		}
+		    		};
 		    	return container;
 		  	},
 		});
@@ -626,15 +627,12 @@ function addCustomControlShowPokemonWithoutWimp(){
 
 //雑魚（ポッポ、コラッタ）以外を表示
 function showPokemonWithoutWimp(){
-prepareRecord();
-/*
 	//すべてを表示する
 	changeAllPokemon(true);
 	
 	//ポッポ、コラッタを非表示
 	toggleConfigViewList(16);//ポッポ
 	toggleConfigViewList(19);//コラッタ
-*/
 }
 
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
@@ -662,7 +660,7 @@ function addCustomControlShowPushOnly(){
 					container.onclick = function(){
 						console.log('buttonClicked');
 		      			showPushOnly();
-		    		}
+		    		};
 		    	return container;
 		  	},
 		});
@@ -702,13 +700,13 @@ function searchPointByLoc(loc1,loc2){
 	    timeout: 6000,
 	    cache: false
 	}).done(function(data, status, xhr) {
-		if (data.indexOf("OK") != 0) {
+		if (data.indexOf("OK") !== 0) {
 			console.log("★★メンテナンス中★★");
 			_marker_circle[count]=L.circle([loc1,loc2],100,{"fill": true,"fillOpacity": 0.2,"weight": 0,"color": "#ff0000"}).addTo(map);
 		} else {
 			var _tmp = data.split("OK:");
 			var _res = parseValue(_tmp[1]);
-			if (_res["server"] == "busy") {
+			if (_res.server == "busy") {
 				console.log("★★busy★★");
 				_marker_circle[count]=L.circle([loc1,loc2],100,{"fill": true,"fillOpacity": 0.2,"weight": 0,"color": "#ffff00"}).addTo(map);
 				research_runserver = _res;
@@ -779,7 +777,7 @@ function addCustomControlSearchPokeSource(){
 
 					container.onclick = function(){
 		      			searchPokesourceMain();
-		    		}
+		    		};
 		    	return container;
 		  	},
 		});
@@ -796,6 +794,7 @@ var _timerIdCheckPokeFound;
 var _timerIdResetCounter;
 //_/_/_/_/_/_/_/_/ポケソースサーチ実行_/_/_/_/_/_/_/_/_/_/
 function searchPokesourceMain(){
+    var i;
 	if(_isShowPokesourceMode) {
 		//停止
         _isShowPokesourceMode = false;
@@ -806,7 +805,6 @@ function searchPokesourceMain(){
 		clearInterval(_timerIdResetCounter);
 
 		//マーカーをクリア
-		var i;
 		for(i=0;i<_marker_circle.length;i++){
 			if(_marker_circle[i]) {
 			 	_marker_circle[i].remove();
@@ -873,15 +871,15 @@ var _prepareCount = 0;
 var _prepareOK = false;
 //_/_/_/_/_/_/_/_/ポケソース更新の準備処理_/_/_/_/_/_/_/_/_/_/
 function prepareSearchPokesource(lat,lng) {
-	var mode = 'viewData'
-	if (research_runserver["dbserver"]) {
-		using_dbserver = research_runserver["dbserver"];
+	var mode = 'viewData';
+	if (research_runserver.dbserver) {
+		using_dbserver = research_runserver.dbserver;
 	}	
 		
 	var pokesource = ""+lat+","+lng;
 	
 	$.ajax({
-	   	url: "https://"+using_dbserver+"/_dbserver.php?uukey=c2e316f11149c3f8e1ff5da39efe46de&sysversion=1000&action="+encodeURIComponent(mode)+"&fort=&pokesource_loc="+encodeURIComponent(pokesource)+"&history_pokemonid=&sv="+encodeURIComponent(research_runserver["server"])+"&research_key="+encodeURIComponent(research_key)+"&loc1="+encodeURIComponent(lat)+"&loc2="+encodeURIComponent(lng),
+	   	url: "https://"+using_dbserver+"/_dbserver.php?uukey=c2e316f11149c3f8e1ff5da39efe46de&sysversion=1000&action="+encodeURIComponent(mode)+"&fort=&pokesource_loc="+encodeURIComponent(pokesource)+"&history_pokemonid=&sv="+encodeURIComponent(research_runserver.server)+"&research_key="+encodeURIComponent(research_key)+"&loc1="+encodeURIComponent(lat)+"&loc2="+encodeURIComponent(lng),
 //	   	url: "https://"+using_dbserver+"/_dbserver.php?action="+encodeURIComponent(mode)+"&fort=&pokesource_loc="+encodeURIComponent(pokesource)+"&history_pokemonid=&sv="+encodeURIComponent(research_runserver["server"])+"&research_key="+encodeURIComponent(research_key)+"&loc1="+encodeURIComponent(lat)+"&loc2="+encodeURIComponent(lng),
 	    type: "GET",
 	    data: "",
@@ -975,22 +973,22 @@ function addPokeSourceList(data){
 
 		//優先ポイントのエリアに入っているかチェック
 		for(i=0;i<_priorityPoint.length;i++){
-			if(    ((_priorityPoint[i][0]-radius) <= latlng_a[0]) && (latlng_a[0] <= (_priorityPoint[i][0]+radius))
-			    && ((_priorityPoint[i][1]-radius) <= latlng_a[1]) && (latlng_a[1] <= (_priorityPoint[i][1]+radius)) ){
+			if(    ((_priorityPoint[i][0]-radius) <= latlng_a[0]) && (latlng_a[0] <= (_priorityPoint[i][0]+radius)) &&
+                   ((_priorityPoint[i][1]-radius) <= latlng_a[1]) && (latlng_a[1] <= (_priorityPoint[i][1]+radius)) ){
 			    priority_a=1;
 			    break;
 			}
 		}
 		for(i=0;i<_priorityPoint.length;i++){
-			if(    ((_priorityPoint[i][0]-radius) <= latlng_b[0]) && (latlng_b[0] <= (_priorityPoint[i][0]+radius))
-			    && ((_priorityPoint[i][1]-radius) <= latlng_b[1]) && (latlng_b[1] <= (_priorityPoint[i][1]+radius)) ){
+			if(    ((_priorityPoint[i][0]-radius) <= latlng_b[0]) && (latlng_b[0] <= (_priorityPoint[i][0]+radius)) &&
+                   ((_priorityPoint[i][1]-radius) <= latlng_b[1]) && (latlng_b[1] <= (_priorityPoint[i][1]+radius)) ){
 			    priority_b=1;
 			    break;
 			}
 		}
 		
 		//優先ポイントの場合は、優先ポイントの有無で比較
-		if(priority_a != 0 || priority_b !=0){
+		if(priority_a !== 0 || priority_b !== 0){
 			return priority_b - priority_a;
 		} 
 		
@@ -1010,7 +1008,7 @@ function drawArea(dataList){
 	var min_lng=0;
 	var max_lat=0;
 	var max_lng=0;
-	for(i=0;i<dataList.length;i++){
+	for(var i=0;i<dataList.length;i++){
 		var ent = parseValue(dataList[i]);
 	
 		if (ent.action != "found_ps") continue;
@@ -1018,7 +1016,7 @@ function drawArea(dataList){
 		var latlng=ent.loc.split(",");
 		
 		//初期値セット
-		if(i==0){
+		if(i === 0){
 			min_lat=latlng[0];
 			min_lng=latlng[1];
 		}
@@ -1046,7 +1044,7 @@ function GetPokeSourceByLoc(loc){
 //ポケモンが発見済みかをチェック
 var _counter_checkPokeFound=0;
 function checkPokeFound(){
-	var mode = 'viewData'
+	var mode = 'viewData';
 	var target=[];
 	var lat;
 	var lng;
@@ -1069,8 +1067,8 @@ function checkPokeFound(){
 
 //	console.log("★★ポケモン発見済みチェック:" + counter);
 
-	if (research_runserver["dbserver"]) {
-		using_dbserver = research_runserver["dbserver"];
+	if (research_runserver.dbserver) {
+		using_dbserver = research_runserver.dbserver;
 	}
 	
 	//処理対象を決定
@@ -1086,7 +1084,7 @@ function checkPokeFound(){
 	var pokesource = ""+lat+","+lng;
 	
 	$.ajax({
-	   	url: "https://"+using_dbserver+"/_dbserver.php?uukey=c2e316f11149c3f8e1ff5da39efe46de&sysversion=1000&action="+encodeURIComponent(mode)+"&fort=&pokesource_loc="+encodeURIComponent(pokesource)+"&history_pokemonid=&sv="+encodeURIComponent(research_runserver["server"])+"&research_key="+encodeURIComponent(research_key)+"&loc1="+encodeURIComponent(lat)+"&loc2="+encodeURIComponent(lng),
+	   	url: "https://"+using_dbserver+"/_dbserver.php?uukey=c2e316f11149c3f8e1ff5da39efe46de&sysversion=1000&action="+encodeURIComponent(mode)+"&fort=&pokesource_loc="+encodeURIComponent(pokesource)+"&history_pokemonid=&sv="+encodeURIComponent(research_runserver.server)+"&research_key="+encodeURIComponent(research_key)+"&loc1="+encodeURIComponent(lat)+"&loc2="+encodeURIComponent(lng),
 //	   	url: "https://"+using_dbserver+"/_dbserver.php?action="+encodeURIComponent(mode)+"&fort=&pokesource_loc=&history_pokemonid=&sv="+encodeURIComponent(research_runserver["server"])+"&research_key="+encodeURIComponent(research_key)+"&loc1="+encodeURIComponent(lat)+"&loc2="+encodeURIComponent(lng),
 	    type: "GET",
 	    data: "",
@@ -1135,7 +1133,7 @@ function searchPokesource(){
 	if(!_prepareOK) return;
 
 	if(!_pokesource_list) return;
-	if(_pokesource_list.length==0) return;
+	if(_pokesource_list.length === 0) return;
 	
 	//処理対象を調べる
 	for(i=_count;i<=_pokesource_list.length;i++){
@@ -1191,7 +1189,7 @@ function searchPokesource(){
 	
 	//カウンタをインクリメント
 	_count++;
-	if(_pokesource_list.length<=_count){_count=0};	
+	if(_pokesource_list.length<=_count){_count=0;}
 }
 
 //カウンタリセット
@@ -1313,7 +1311,7 @@ function addCustomControlStreetView(){
 
 					container.onclick = function(){
 		      			showStreetView();
-		    		}
+		    		};
 		    	return container;
 		  	},
 		});
@@ -1471,12 +1469,9 @@ function addMarkerToStreetView(key) {
 	var myCharLatLng = _myChar.getLatLng();
 
 	//ストリートビューへの追加前チェック
-	var i;
-	for(i=0; i<_streetViewMarkers.length;i++){
-		var marker = _streetViewMarkers[i]
-		
+	for(var i=0; i<_streetViewMarkers.length;i++){
 		//既に追加済みであれば追加しない
-		if(marker.loc == key) return;	//既に追加済み
+		if(_streetViewMarkers[i].loc == key) return;	//既に追加済み
 	}
 
 	//半径200m以上であれば追加しない
@@ -1504,16 +1499,16 @@ function addMarkerToStreetView(key) {
 	            if(_panorama.getPosition().toString() == data.location.latLng.toString()){
 	            	var message;
 	            	//位置が変わらない場合は、これ以上近づけないのでメッセージを表示
-			        if($("#view_message_area").size() == 0){
+			        if($("#view_message_area").size() === 0){
 				        message = document.createElement('div');
-				        message.id = "view_message_area"
-				        message.style.backgroundColor = "rgba(200, 200, 255, 0.901961)"
+				        message.id = "view_message_area";
+				        message.style.backgroundColor = "rgba(200, 200, 255, 0.901961)";
 				        message.style.height = "24px";
-				        message.style.width = "50%";
+				        message.style.width = "70%";
 				        message.style.fontFamily = "Meiryo";
 				        message.style.fontSize = "medium";
 				        message.style.textAlign = "center";
-				        message.style.display = "none"
+				        message.style.display = "none";
 						message.innerHTML = "これ以上近づけません（＞＿＜）";
 					} else {
 						//なんか再描画で位置がずれるので、再格納する
@@ -1532,7 +1527,7 @@ function addMarkerToStreetView(key) {
 	            }				
 	        }else{
 	        	//ストリートビュー非対応の場合
-	        	console.log("■■ストリートビュー非対応or不明なエラー")
+	        	console.log("■■ストリートビュー非対応or不明なエラー");
 			}
 		});
 	});
@@ -1542,9 +1537,8 @@ function addMarkerToStreetView(key) {
 
 //_/_/_/_/_/_/_/_/ストリートビューから、指定のマーカ削除_/_/_/_/_/_/_/_/_/_/
 function removeMarkerFromStreetView(key){
-	var i;
-	for(i=0; i<_streetViewMarkers.length;i++){
-		var marker = _streetViewMarkers[i]
+	for(var i=0; i<_streetViewMarkers.length;i++){
+		var marker = _streetViewMarkers[i];
 		if(marker.loc == key){
 			marker.setMap(null);
 			_streetViewMarkers.splice(i,1);
@@ -1581,7 +1575,7 @@ function addCustomControlShowFullScreen(){
 
 					container.onclick = function(){
 		      			showFullScreen();
-		    		}
+		    		};
 		    	return container;
 		  	},
 		});
@@ -1643,37 +1637,83 @@ function toggleFullScreen(full){
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 //_/_/_/_/_/_/_/_/音声認識_/_/_/_/_/_/_/_/_/_/_/_/
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
-var _isSpeakMode = false;	//音声認識モードかどうか
+function addCustomControlToggleSpeechRecognition(){
+	//ブラウザ未対応なら処理しない
+	if(!(window.SpeechRecognition || webkitSpeechRecognition)) return;
+	
+	var customControlToggleSpeechRecognition = L.Control.extend({
+			options: {
+		    	position: 'bottomright' 
+		  	},
+
+			onAdd: function (map) {
+				var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom leaflet-control-command-interior');
+					container.id = "button_customcontrol_toggleSpeechRecognition";
+					container.innerHTML = "音声認識";
+					container.style.backgroundColor = 'white';
+					container.style.width = '80px';
+					container.style.height = '20px';
+					container.style.padding = '5px';
+					container.style.fontSize = '50%';
+					container.style.textAlign = 'center';
+					container.style.fontColor = '#999999';
+					container.style.cursor = 'pointer';
+
+					container.onclick = function(){
+		      			toggleSpeechRecognition();
+		    		};
+		    	return container;
+		  	},
+		});
+	map.addControl(new customControlToggleSpeechRecognition());
+}
+
+var _isSpeechRecognitionMode = false;
+//_/_/_/_/_/_/_/_/音声認識表示切替_/_/_/_/_/_/_/_/_/_/
+function toggleSpeechRecognition(){
+	if(_isSpeechRecognitionMode) {
+		//停止
+		$('#button_customcontrol_toggleSpeechRecognition').css('backgroundColor', 'white');
+		stopSpeechRecognition();
+        _isSpeechRecognitionMode = false;
+    } else {
+    	//開始
+		$('#button_customcontrol_toggleSpeechRecognition').css('backgroundColor', '#FFCC66');
+		//開始準備
+		prepareSpeechRecognition();
+		//リッスン開始
+		startSpeechRecognition();
+        _isSpeechRecognitionMode = true;
+    }
+}
+
 //_/_/_/_/_/_/_/_/音声認識事前準備_/_/_/_/_/_/_/_/_/_/
-function prepareRecord(){
+function prepareSpeechRecognition(){
 	//メッセージエリア作成
-	if($('#area_window_recordinfo').size() == 0 ){
-		var html = '<div id="area_window_recordinfo" style="position:fixed;background-color:rgba(255,202,202,1);padding:0px;z-index:1000200;bottom:0px;left:0px;right:0px;height:25px;display:block;">'
-		html += '<TABLE border="0" width="100%" height="24" cellpadding="0" cellspacing="0">'
-		html += '	<TR>'
-		html += '	<TD align="center" valign="middle">'
-		html += '		<span id="area_window_recordinfo_message" style="font-weight:bold;color:red;font-size:70%;">何か喋ってください「近くの○○を表示」「○○だけを表示」など</span>'
-		html += '	</TD>'
-		html += '	</TR>'
-		html += '</TABLE>'
-    	html += '</div>'
+	if($('#area_window_recordinfo').size() === 0 ){
+		var html = '<div id="area_window_recordinfo" style="position:fixed;background-color:rgba(255,202,202,1);padding:0px;z-index:1000200;bottom:0px;left:0px;right:0px;height:25px;display:block;">';
+		html += '<TABLE border="0" width="100%" height="24" cellpadding="0" cellspacing="0">';
+		html += '	<TR>';
+		html += '	<TD align="center" valign="middle">';
+		html += '		<span id="area_window_recordinfo_message" style="font-weight:bold;color:red;font-size:70%;"></span>';
+		html += '	</TD>';
+		html += '	</TR>';
+		html += '</TABLE>';
+    	html += '</div>';
 
 		$('body').append(html);
 	} else {
 		$('#area_window_recordinfo').css({"display": "block"});
 	}
 	
-	//音声認識モードON
-	_isSpeakMode = true;
-	
-	//リッスン開始
-	startRecord();
+	$('#area_window_recordinfo_message').text("何か喋ってください「近くの○○を表示」「○○だけを表示」など");
+
 }
 
 //_/_/_/_/_/_/_/_/音声認識開始/_/_/_/_/_/_/_/_/_/
-function startRecord(){
+function startSpeechRecognition(){
     //音声認識モードがOFFなら処理しない
-    if(!_isSpeakMode) return;
+    if(!_isSpeechRecognitionMode) return;
      
     window.SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
 
@@ -1694,27 +1734,27 @@ function startRecord(){
     };
     recognition.onnomatch = function(){
         console.log("認識不明");
-        startRecord();           
+        startSpeechRecognition();           
     };
     recognition.onerror= function(){
         console.log("認識エラー:");
         if(event.error == "no-speech") {
 	        //無言エラーの時は再度リッスン
-            startRecord();
+            startSpeechRecognition();
         } else if(event.error == "not-allowed") {
 	        //未許可の場合
         	$("#area_window_recordinfo_message").text("音声認識エラー:マイクの使用を許可してください");
-        	_isSpeakMode=false;
+        	_isSpeechRecognitionMode=false;
 		} else {
         	//想定外エラーの時は、エラーメッセージを表示し、停止
         	$("#area_window_recordinfo_message").text("音声認識エラー:" + event.error);
-        	_isSpeakMode=false;
+        	_isSpeechRecognitionMode=false;
         }
     };
     recognition.onsoundend = function(){
         console.log("認識終了");
         //終了時は、引き続き次のリッスン
-        startRecord();
+        startSpeechRecognition();
     };
     
     //認識結果
@@ -1733,14 +1773,11 @@ function startRecord(){
 }
 
 //_/_/_/_/_/_/_/_/音声認識終了_/_/_/_/_/_/_/_/_/_/
-function stopRecord(){
+function stopSpeechRecognition(){
 	//メッセージエリア非表示
-	if($('#area_window_recordinfo').size() != 0 ){
-		$('#area_window_recordinfo').css({"display": "hidden"});
+	if($('#area_window_recordinfo').size() !== 0 ){
+		$('#area_window_recordinfo').css({"display": "none"});
 	}
-	
-	//リッスン終了
-	_isSpeakMode = false;
 }
 
 //_/_/_/_/_/_/_/_/メッセージをもとにアクション実行/_/_/_/_/_/_/_/_/_/
@@ -1749,7 +1786,7 @@ function doActionByMessage(message){
 
     //^:先頭マッチ　$：末尾マッチ
     var actionList = {
-        "showNearPokemon":["^近くの.*"],
+        "showNearPokemon":["近くの.*"],
         "showAllPokemon":["全部表示して.*","全部表示する$","全部出して.*","全部出す$","全表示して.*","全表示$"],
         "hideAllPokemon":["全部非表示にして.*","全部非表示にする$","全部消して.*","全部消す$","全部隠して.*","全部隠す$","全非表示にして.*","全非表示$"],
         "showOnlyOnePokemon":["だけを?表示して.*","だけを?表示する$","だけ表示$","だけ出して.*","だけ出す$"],
@@ -1796,8 +1833,8 @@ function doActionByMessage(message){
 
 //_/_/_/_/_/_/_/_/メッセージをもとに近くのポケモンを表示/_/_/_/_/_/_/_/_/_/
 function showNearPokemonByMessage(message){
-    //「の」の後、「を」の前がポケモン名
-    var pokeName = message.split("の")[1];
+    //「近くの」の後、「を」の前がポケモン名
+    var pokeName = message.split("近くの")[1];
     if(!pokeName) return false;
 
 	pokeName = pokeName.split("を")[0];
@@ -1930,46 +1967,74 @@ function getPokemonIdByName(pokeName){
 function convertPokemonName(pokeName){
     var convertList = {
         "ヒトカゲ":["人影"],
-        "カメール":["亀戸"],
+        "カメール":["亀戸","か メール"],
         "カメックス":["カメ エクス"],
+        "スピアー":["スペア","すき屋"],
         "ピジョット":["リゾット"],
         "コラッタ":["もらった"],
         "ラッタ":["あった","だった","バッタ","待った"],
+        "オニスズメ":["お店 爪"],
+        "アーボ":["青","あほ","ラボ","アボ"],
+        "アーボック":["a book"],
+        "ライチュウ":["ランチ","らいちゅう"],
         "ニドラン♀":["ニドランメス","ニドラン 女"],
         "ニドラン♂":["ニドランオス","ニドラン 男"],
-        "ニドリーノ":["緑の","みどりいぬ"],
-        "キュウコン":["球根"],
+        "ニドリーノ":["緑の","みどりの","みどりいぬ"],
+        "ピクシー":["タクシー"],
+        "ロコン":["ローソン"],
+        "キュウコン":["球根","クーポン"],
+        "プリン":["不倫"],
         "プクリン":["ぽこりん","北鈴"],
         "クサイハナ":["臭い花"],
         "コンパン":["アンパン","根本"],
         "ニャース":["ニュース","ピアス","宮津"],
         "マンキー":["ファンキー","満期"],
-        "ガーディ":["ガーディー"],
+        "ガーディ":["ガーディー","ガーデン"],
         "ウィンディ":["ウィンディー","windy"],
-        "ケーシィ":["kc"],
+        "ケーシィ":["kc","警視","ケーキ"],
+        "ユンゲラー":["エンペラー"],
         "フーディン":["風鈴"],
         "ゴーリキー":["剛力"],
-        "カイリキー":["怪力"],
+        "カイリキー":["怪力","かいりき"],
+        "マダツボミ":["まだつぼみ"],
+        "ウルドン":["うどん"],
+        "メノクラゲ":["めのくらげ"],
+        "ドククラゲ":["床 クラブ"],
+        "イシツブテ":["いすゞホテル","石つぶて"],
+        "ゴローン":["コロン"],
+        "ゴローニャ":["娘ローニャ"],
+        "ギャロップ":["テロップ"],
+        "ヤドラン":["宿らん"],
         "コイル":["ホイール"],
+        "ドードー":["労働"],
         "ジュゴン":["ズボン"],
+        "ゴース":["コース","モス"],
         "ゲンガー":["電話"],
+        "スリープ":["釣具","スイーツ","クレープ"],
+        "スリーパー":["スーパー"],
         "タマタマ":["たまたま"],
         "ナッシー":["なっしー","なすしお"],
+        "ガラガラ":["がらがら"],
         "サワムラー":["沢村"],
         "エビワラー":["海老原"],
+        "ドガース":["どかす","どがわ","土 ガス"],
+        "サイホーン":["サイフォン"],
         "サイドン":["sidem"],
-        "タッツー":["たっつ"],
+        "モンジャラ":["もんじゃ屋"],
+        "タッツー":["たっつ","卓球"],
         "アズマオウ":["東"],
         "スターミー":["スター ミー"],
         "エレブー":["セレブ"],
-        "ブーバー":["ウーバー","ブラ"],
+        "ブーバー":["ウーバー","ブラ","棒バー"],
+        "ギャラドス":["キャラドス"],
         "イーブイ":["av","ev"],
         "オムスター":["ハムスター","モンスター"],
         "カブト":["兜"],
         "プテラ":["ホテル"],
         "フリーザー":["フリーザ"],
         "ハウクリュー":["白竜"],
-        "カイリュー":["海流"]
+        "カイリュー":["海流"],
+        "ミュウ":["水"],
     };
     
     //空白除去
