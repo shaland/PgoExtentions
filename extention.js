@@ -43,6 +43,9 @@ function startExtention(){
 	//フッタ非表示
 	hideFooter();
 	
+	//拡張ヘルプを表示
+	$("#area_footer td").append($("<a href='https://github.com/shaland/PgoExtentions' target='_blank'>拡張説明</a>"));
+
 	//ボタンサーチを非表示
 	$("#area_buttonsearch").hide();
 	
@@ -76,6 +79,7 @@ function startExtention(){
 	//近くのポケモンクリック(いきなりすぎると表示まで時間かかるのでディレイ)
 	setTimeout(function(){$("#button_customcontrol_ShowNearPokemon").click();},3000)
 }
+
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 //_/_/_/_/_/_/_/_/汎用関数_/_/_/_/_/_/_/_/_/_/_/_/
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
@@ -1639,9 +1643,7 @@ function toggleFullScreen(full){
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 //_/_/_/_/_/_/_/_/音声認識_/_/_/_/_/_/_/_/_/_/_/_/
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
-
-var _isSpeakMode = true;
-var _isRecording = false;
+var _isSpeakMode = false;	//音声認識モードかどうか
 //_/_/_/_/_/_/_/_/音声認識事前準備_/_/_/_/_/_/_/_/_/_/
 function prepareRecord(){
 	//メッセージエリア作成
@@ -1650,7 +1652,7 @@ function prepareRecord(){
 		html += '<TABLE border="0" width="100%" height="24" cellpadding="0" cellspacing="0">'
 		html += '	<TR>'
 		html += '	<TD align="center" valign="middle">'
-		html += '		<span id="area_window_recordinfo_message" style="font-weight:bold;color:red;font-size:70%;">「ポケモンＧＯ！」で認識開始</span>'
+		html += '		<span id="area_window_recordinfo_message" style="font-weight:bold;color:red;font-size:70%;">何か喋ってください「近くの○○を表示」「○○だけを表示」など</span>'
 		html += '	</TD>'
 		html += '	</TR>'
 		html += '</TABLE>'
@@ -1661,21 +1663,11 @@ function prepareRecord(){
 		$('#area_window_recordinfo').css({"display": "block"});
 	}
 	
+	//音声認識モードON
+	_isSpeakMode = true;
+	
 	//リッスン開始
 	startRecord();
-}
-
-//_/_/_/_/_/_/_/_/音声認識切り替え_/_/_/_/_/_/_/_/_/_/
-function toggleRecord(isStart){
-    if(isStart){
-        //開始
-        _isRecording=true;
-        $("#area_window_recordinfo_message").text("認識中…");
-    } else{
-        //停止
-        _isRecording=false;
-        $("#area_window_recordinfo_message").text("「ポケモンＧＯ！」で認識開始");
-    }
 }
 
 //_/_/_/_/_/_/_/_/音声認識開始/_/_/_/_/_/_/_/_/_/
@@ -1702,15 +1694,21 @@ function startRecord(){
     };
     recognition.onnomatch = function(){
         console.log("認識不明");
-//        startRecord();           
+        startRecord();           
     };
     recognition.onerror= function(){
-        console.log("認識エラー");
-        //無言エラーの時は再度リッスン
+        console.log("認識エラー:");
         if(event.error == "no-speech") {
+	        //無言エラーの時は再度リッスン
             startRecord();
-        } else {
+        } else if(event.error == "not-allowed") {
+	        //未許可の場合
+        	$("#area_window_recordinfo_message").text("音声認識エラー:マイクの使用を許可してください");
+        	_isSpeakMode=false;
+		} else {
+        	//想定外エラーの時は、エラーメッセージを表示し、停止
         	$("#area_window_recordinfo_message").text("音声認識エラー:" + event.error);
+        	_isSpeakMode=false;
         }
     };
     recognition.onsoundend = function(){
@@ -1725,20 +1723,24 @@ function startRecord(){
         var message = results[0][0].transcript;
 
         if(results[0].isFinal){
-            if(_isRecording){
-                $("#area_window_recordinfo_message").text(message);
-                doActionByMessage(message);
-                toggleRecord(false);
-            } else if(message=="ポケモン go"){
-               toggleRecord(true);
-            }
+            $("#area_window_recordinfo_message").text(message);
+            doActionByMessage(message);
         } else {
-            if(_isRecording){
-                $("#area_window_recordinfo_message").text("(解析中)" +message);
-            }
+	        $("#area_window_recordinfo_message").text("(解析中)" +message);
         }
     };
     recognition.start();
+}
+
+//_/_/_/_/_/_/_/_/音声認識終了_/_/_/_/_/_/_/_/_/_/
+function stopRecord(){
+	//メッセージエリア非表示
+	if($('#area_window_recordinfo').size() != 0 ){
+		$('#area_window_recordinfo').css({"display": "hidden"});
+	}
+	
+	//リッスン終了
+	_isSpeakMode = false;
 }
 
 //_/_/_/_/_/_/_/_/メッセージをもとにアクション実行/_/_/_/_/_/_/_/_/_/
@@ -1747,6 +1749,7 @@ function doActionByMessage(message){
 
     //^:先頭マッチ　$：末尾マッチ
     var actionList = {
+        "showNearPokemon":["^近くの.*"],
         "showAllPokemon":["全部表示して.*","全部表示する$","全部出して.*","全部出す$","全表示して.*","全表示$"],
         "hideAllPokemon":["全部非表示にして.*","全部非表示にする$","全部消して.*","全部消す$","全部隠して.*","全部隠す$","全非表示にして.*","全非表示$"],
         "showOnlyOnePokemon":["だけを?表示して.*","だけを?表示する$","だけ表示$","だけ出して.*","だけ出す$"],
@@ -1757,12 +1760,9 @@ function doActionByMessage(message){
     //アクションを検索
     var action = "Unknown";
     L: for(var key in actionList) {
-        console.log("key:" + key);
         var actions = actionList[key];
         for(var i=0;i<=actions.length-1;i++){
-            console.log("debug:"  + actions[i]);
             if(message.match(actions[i])){
-               console.log("action:" + key + " by-" + actions[i]);
                 action = key;
                 break L;
             }
@@ -1773,6 +1773,9 @@ function doActionByMessage(message){
     
     //アクションにより処理を分ける
     switch(action){
+        case "showNearPokemon":
+        	result = showNearPokemonByMessage(message);
+            break;
         case "showAllPokemon":
         	result = showAllPokemonByMessage(message);
             break;
@@ -1789,6 +1792,33 @@ function doActionByMessage(message){
         	result = hidePokemonByMessage(message);
             break;
     }
+}
+
+//_/_/_/_/_/_/_/_/メッセージをもとに近くのポケモンを表示/_/_/_/_/_/_/_/_/_/
+function showNearPokemonByMessage(message){
+    //「の」の後、「を」の前がポケモン名
+    var pokeName = message.split("の")[1];
+    if(!pokeName) return false;
+
+	pokeName = pokeName.split("を")[0];
+    
+    //ポケモンIDを名前より取得
+    var pokemonId = getPokemonIdByName(pokeName);
+
+    console.log("Pokemon：" + pokeName + "(" + pokemonId + ")");
+
+    //ポケモンIDが取得できなければ終了
+    if(pokemonId == -1) return false;
+
+	for (i=0;i<_shownList.length;i++){
+		if(!_shownList[i]) continue;
+		
+		if(pokemonId == _shownList[i].id){
+			onShownPokemonClick(pokemonId);
+		}
+	}
+		
+	return true;
 }
 
 //_/_/_/_/_/_/_/_/メッセージをもとに全てのポケモンを表示/_/_/_/_/_/_/_/_/_/
