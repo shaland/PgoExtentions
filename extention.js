@@ -1,20 +1,3 @@
-Skip to content
-This repository
-Search
-Pull requests
-Issues
-Gist
- @shaland
- Watch 0
-  Star 0
-  Fork 0 shaland/PgoExtentions
- Code  Issues 0  Pull requests 0  Projects 0  Wiki  Pulse  Graphs  Settings
-Tree: fd3d9c7cc4 Find file Copy pathPgoExtentions/extention.js
-fd3d9c7  34 minutes ago
-@shaland shaland 音声認識機能追加
-1 contributor
-RawBlameHistory     
-2054 lines (1766 sloc)  72.7 KB
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 //_/_/_/_/_/_/_/_/拡張開始_/_/_/_/_/_/_/_/_/_/_/_/　
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
@@ -2068,5 +2051,3 @@ function convertPokemonName(pokeName){
     //元の名称を返却
     return pokeName;
 }
-Contact GitHub API Training Shop Blog About
-© 2017 GitHub, Inc. Terms Privacy Security Status Help
