@@ -89,7 +89,7 @@ function changeAllPokemon(isShow){
 	//スタイル未定義エラー回避のため、一度も処理されていない場合はスタイルをダミーで作成
 	if($.trim($("#area_customcontrol_config_data_list").html()) === ""){
 		var viewhtml = "";
-		for (var i=1; i<=151; i++) {
+		for (var i=1; i<=251; i++) {
 			viewhtml += "<div id='area_configwindow_list_"+i+"' style='width:260px;' ></div>";
 		}
 		$("#area_customcontrol_config_data_list").html(viewhtml);
@@ -669,7 +669,7 @@ function addCustomControlShowPushOnly(){
 
 function showPushOnly(){
 	//プッシュ通知以外は非表示にする
-	for (var i=1; i<=151; i++) {
+	for (var i=1; i<=251; i++) {
 		if( (config_push[i]=="1" && config_viewlist[i]=="1") || (config_push[i]!="1" && config_viewlist[i]!="1") ){
 			toggleConfigViewList(i);
 		}
@@ -695,8 +695,7 @@ function searchPointByLoc(loc1,loc2){
 	$.ajax({
 	    url: "https://sv-webdb1.pmap.kuku.lu/_server.php",
 	    type: "GET",
-	    data: "&uukey=c2e316f11149c3f8e1ff5da39efe46de&sysversion=1000&action=addServerQueue&run_key="+research_key+"&loc1="+loc1+"&loc2="+loc2,
-//	    data: "&action=addServerQueue&run_key="+research_key+"&loc1="+loc1+"&loc2="+loc2,
+	    data: "&uukey=74b61dbe957a92762fae3694c77864cb&sysversion=1210&action=addServerQueue&run_key="+research_key+"&loc1="+loc1+"&loc2="+loc2,
 	    timeout: 6000,
 	    cache: false
 	}).done(function(data, status, xhr) {
@@ -879,8 +878,8 @@ function prepareSearchPokesource(lat,lng) {
 	var pokesource = ""+lat+","+lng;
 	
 	$.ajax({
-	   	url: "https://"+using_dbserver+"/_dbserver.php?uukey=c2e316f11149c3f8e1ff5da39efe46de&sysversion=1000&action="+encodeURIComponent(mode)+"&fort=&pokesource_loc="+encodeURIComponent(pokesource)+"&history_pokemonid=&sv="+encodeURIComponent(research_runserver.server)+"&research_key="+encodeURIComponent(research_key)+"&loc1="+encodeURIComponent(lat)+"&loc2="+encodeURIComponent(lng),
-//	   	url: "https://"+using_dbserver+"/_dbserver.php?action="+encodeURIComponent(mode)+"&fort=&pokesource_loc="+encodeURIComponent(pokesource)+"&history_pokemonid=&sv="+encodeURIComponent(research_runserver["server"])+"&research_key="+encodeURIComponent(research_key)+"&loc1="+encodeURIComponent(lat)+"&loc2="+encodeURIComponent(lng),
+	   	url: "https://"+using_dbserver+"/_dbserver.php?uukey=74b61dbe957a92762fae3694c77864cb&sysversion=1210&action="+encodeURIComponent(mode)+"&fort=&pokesource_loc="+encodeURIComponent(pokesource)+"&history_pokemonid=&sv="+encodeURIComponent(research_runserver.server)+"&research_key="+encodeURIComponent(research_key)+"&loc1="+encodeURIComponent(lat)+"&loc2="+encodeURIComponent(lng),
+//	   	url: "https://"+using_dbserver+"/_dbserver.php?uukey=c2e316f11149c3f8e1ff5da39efe46de&sysversion=1000&action="+encodeURIComponent(mode)+"&fort=&pokesource_loc="+encodeURIComponent(pokesource)+"&history_pokemonid=&sv="+encodeURIComponent(research_runserver.server)+"&research_key="+encodeURIComponent(research_key)+"&loc1="+encodeURIComponent(lat)+"&loc2="+encodeURIComponent(lng),
 	    type: "GET",
 	    data: "",
 	    timeout: 8000,
@@ -1084,8 +1083,7 @@ function checkPokeFound(){
 	var pokesource = ""+lat+","+lng;
 	
 	$.ajax({
-	   	url: "https://"+using_dbserver+"/_dbserver.php?uukey=c2e316f11149c3f8e1ff5da39efe46de&sysversion=1000&action="+encodeURIComponent(mode)+"&fort=&pokesource_loc="+encodeURIComponent(pokesource)+"&history_pokemonid=&sv="+encodeURIComponent(research_runserver.server)+"&research_key="+encodeURIComponent(research_key)+"&loc1="+encodeURIComponent(lat)+"&loc2="+encodeURIComponent(lng),
-//	   	url: "https://"+using_dbserver+"/_dbserver.php?action="+encodeURIComponent(mode)+"&fort=&pokesource_loc=&history_pokemonid=&sv="+encodeURIComponent(research_runserver["server"])+"&research_key="+encodeURIComponent(research_key)+"&loc1="+encodeURIComponent(lat)+"&loc2="+encodeURIComponent(lng),
+	   	url: "https://"+using_dbserver+"/_dbserver.php?uukey=74b61dbe957a92762fae3694c77864cb&sysversion=1210&action="+encodeURIComponent(mode)+"&fort=&pokesource_loc="+encodeURIComponent(pokesource)+"&history_pokemonid=&sv="+encodeURIComponent(research_runserver.server)+"&research_key="+encodeURIComponent(research_key)+"&loc1="+encodeURIComponent(lat)+"&loc2="+encodeURIComponent(lng),
 	    type: "GET",
 	    data: "",
 	    timeout: 8000,
@@ -1832,9 +1830,9 @@ function doActionByMessage(message){
     }
     
     if(result){
-	    $("#area_window_recordinfo_message").text([処理完了]message);
+	    $("#area_window_recordinfo_message").text("[処理完了]"+message);
     } else {
-	    $("#area_window_recordinfo_message").text([理解不能]message);
+	    $("#area_window_recordinfo_message").text("[理解不能]"+message);
     }
 }
 
@@ -1962,7 +1960,7 @@ function getPokemonIdByName(pokeName){
     pokeName = convertPokemonName(pokeName);
     
     //ポケモンリストから一致するIDを検索して返す
-	for(var i=1; i<=151; i++) {
+	for(var i=1; i<=251; i++) {
         if(pokemon_table_ja[i].match(pokeName + " *([\\(\\<].*|$)")) return i;
     }
     
@@ -2004,7 +2002,7 @@ function convertPokemonName(pokeName){
         "ゴーリキー":["剛力"],
         "カイリキー":["怪力","かいりき"],
         "マダツボミ":["まだつぼみ"],
-        "ウルドン":["うどん"],
+        "ウツドン":["うどん"],
         "メノクラゲ":["めのくらげ"],
         "ドククラゲ":["床 クラブ"],
         "イシツブテ":["いすゞホテル","石つぶて"],
