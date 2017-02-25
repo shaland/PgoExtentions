@@ -1788,8 +1788,8 @@ function doActionByMessage(message){
     //^:先頭マッチ　$：末尾マッチ
     var actionList = {
         "showNearPokemon":["近くの.*"],
-        "showAllPokemon":["全部表示して.*","全部表示する$","全部出して.*","全部出す$","全表示して.*","全表示$"],
-        "hideAllPokemon":["全部非表示にして.*","全部非表示にする$","全部消して.*","全部消す$","全部隠して.*","全部隠す$","全非表示にして.*","全非表示$"],
+        "showAllPokemon":["全.*ポケモンを表示して.*","全.*ポケモンを表示する$","全.*ポケモンを出して.*","全.*ポケモンを出す$"],
+        "hideAllPokemon":["全.*ポケモンを非表示にして.*","全.*ポケモンを非表示にする$","全.*ポケモンを消して.*","全.*ポケモンを消す$","全.*ポケモンを隠して.*","全.*ポケモンを隠す$"],
         "showOnlyOnePokemon":["だけを?表示して.*","だけを?表示する$","だけ表示$","だけ出して.*","だけ出す$"],
         "showPokemon":["表示して.*","表示する$","表示$","出して.*","出す$"],
         "hidePokemon":["非表示にして.*","非表示にする$","消して.*","消す$","隠して.*","隠す$"]
@@ -1829,6 +1829,12 @@ function doActionByMessage(message){
         case "hidePokemon":
         	result = hidePokemonByMessage(message);
             break;
+    }
+    
+    if(result){
+	    $("#area_window_recordinfo_message").text([処理完了]message);
+    } else {
+	    $("#area_window_recordinfo_message").text([理解不能]message);
     }
 }
 
