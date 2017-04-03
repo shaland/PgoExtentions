@@ -695,7 +695,8 @@ function searchPointByLoc(loc1,loc2){
 	$.ajax({
 	    url: "https://sv-webdb1.pmap.kuku.lu/_server.php",
 	    type: "GET",
-	    data: "&uukey=74b61dbe957a92762fae3694c77864cb&sysversion=1260&action=addServerQueue&run_key="+research_key+"&loc1="+loc1+"&loc2="+loc2,
+	    data: "&uukey=ed527607af1a238a4576b2559f7f54c7&sysversion=1290&action=addServerQueue&run_key="+research_key+"&loc1="+loc1+"&loc2="+loc2,
+//	    data: "&uukey=74b61dbe957a92762fae3694c77864cb&sysversion=1260&action=addServerQueue&run_key="+research_key+"&loc1="+loc1+"&loc2="+loc2,
 	    timeout: 6000,
 	    cache: false
 	}).done(function(data, status, xhr) {
@@ -878,7 +879,8 @@ function prepareSearchPokesource(lat,lng) {
 	var pokesource = ""+lat+","+lng;
 	
 	$.ajax({
-	   	url: "https://"+using_dbserver+"/_dbserver.php?uukey=74b61dbe957a92762fae3694c77864cb&sysversion=1260&action="+encodeURIComponent(mode)+"&fort=&pokesource_loc="+encodeURIComponent(pokesource)+"&history_pokemonid=&sv="+encodeURIComponent(research_runserver.server)+"&research_key="+encodeURIComponent(research_key)+"&loc1="+encodeURIComponent(lat)+"&loc2="+encodeURIComponent(lng),
+	   	url: "https://"+using_dbserver+"/_dbserver.php?uukey=ed527607af1a238a4576b2559f7f54c7&sysversion=1290&action="+encodeURIComponent(mode)+"&fort=&pokesource_loc="+encodeURIComponent(pokesource)+"&history_pokemonid=&sv="+encodeURIComponent(research_runserver.server)+"&research_key="+encodeURIComponent(research_key)+"&loc1="+encodeURIComponent(lat)+"&loc2="+encodeURIComponent(lng),
+//	   	url: "https://"+using_dbserver+"/_dbserver.php?uukey=74b61dbe957a92762fae3694c77864cb&sysversion=1260&action="+encodeURIComponent(mode)+"&fort=&pokesource_loc="+encodeURIComponent(pokesource)+"&history_pokemonid=&sv="+encodeURIComponent(research_runserver.server)+"&research_key="+encodeURIComponent(research_key)+"&loc1="+encodeURIComponent(lat)+"&loc2="+encodeURIComponent(lng),
 //	   	url: "https://"+using_dbserver+"/_dbserver.php?uukey=c2e316f11149c3f8e1ff5da39efe46de&sysversion=1000&action="+encodeURIComponent(mode)+"&fort=&pokesource_loc="+encodeURIComponent(pokesource)+"&history_pokemonid=&sv="+encodeURIComponent(research_runserver.server)+"&research_key="+encodeURIComponent(research_key)+"&loc1="+encodeURIComponent(lat)+"&loc2="+encodeURIComponent(lng),
 	    type: "GET",
 	    data: "",
@@ -1083,7 +1085,8 @@ function checkPokeFound(){
 	var pokesource = ""+lat+","+lng;
 	
 	$.ajax({
-	   	url: "https://"+using_dbserver+"/_dbserver.php?uukey=74b61dbe957a92762fae3694c77864cb&sysversion=1260&action="+encodeURIComponent(mode)+"&fort=&pokesource_loc="+encodeURIComponent(pokesource)+"&history_pokemonid=&sv="+encodeURIComponent(research_runserver.server)+"&research_key="+encodeURIComponent(research_key)+"&loc1="+encodeURIComponent(lat)+"&loc2="+encodeURIComponent(lng),
+	   	url: "https://"+using_dbserver+"/_dbserver.php?uukey=ed527607af1a238a4576b2559f7f54c7&sysversion=1290&action="+encodeURIComponent(mode)+"&fort=&pokesource_loc="+encodeURIComponent(pokesource)+"&history_pokemonid=&sv="+encodeURIComponent(research_runserver.server)+"&research_key="+encodeURIComponent(research_key)+"&loc1="+encodeURIComponent(lat)+"&loc2="+encodeURIComponent(lng),
+//	   	url: "https://"+using_dbserver+"/_dbserver.php?uukey=74b61dbe957a92762fae3694c77864cb&sysversion=1260&action="+encodeURIComponent(mode)+"&fort=&pokesource_loc="+encodeURIComponent(pokesource)+"&history_pokemonid=&sv="+encodeURIComponent(research_runserver.server)+"&research_key="+encodeURIComponent(research_key)+"&loc1="+encodeURIComponent(lat)+"&loc2="+encodeURIComponent(lng),
 	    type: "GET",
 	    data: "",
 	    timeout: 8000,
