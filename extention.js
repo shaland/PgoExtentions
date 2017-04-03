@@ -693,7 +693,8 @@ function searchPointByLoc(loc1,loc2){
 	research_key = uuid();
 
 	$.ajax({
-	    url: "https://sv-webdb1.pmap.kuku.lu/_server.php",
+	    url: "https://webdb-pmap.aquapal-cdn.net/_server.php",
+//	    url: "https://sv-webdb1.pmap.kuku.lu/_server.php",
 	    type: "GET",
 	    data: "&uukey=ed527607af1a238a4576b2559f7f54c7&sysversion=1290&action=addServerQueue&run_key="+research_key+"&loc1="+loc1+"&loc2="+loc2,
 //	    data: "&uukey=74b61dbe957a92762fae3694c77864cb&sysversion=1260&action=addServerQueue&run_key="+research_key+"&loc1="+loc1+"&loc2="+loc2,
